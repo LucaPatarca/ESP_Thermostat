@@ -1,10 +1,15 @@
 #include <alexa.h>
 #include <credentials.h>
 
+AlexaController::AlexaController(HWIOController *hwio){
+    m_hwio = hwio;
+}
+
 bool AlexaController::onPowerState(const String &deviceId, bool &state)
 {
     Serial.printf("Thermostat %s turned %s\r\n", deviceId.c_str(), state ? "on" : "off");
     m_powerState = state;
+    m_hwio->setPowerState(m_powerState);
     return true;
 }
 
@@ -13,6 +18,7 @@ bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &t
     m_targetTemperature += temperatureDelta; // calculate absolut temperature
     Serial.printf("Thermostat %s changed temperature about %f to %f", deviceId.c_str(), temperatureDelta, m_targetTemperature);
     temperatureDelta = m_targetTemperature; // return absolut temperature
+    m_hwio->setTargetTemperature(m_targetTemperature);
     return true;
 }
 
@@ -20,6 +26,7 @@ bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemp
 {
     Serial.printf("Thermostat %s set temperature to %f\r\n", deviceId.c_str(), newTemperature);
     m_targetTemperature = newTemperature;
+    m_hwio->setTargetTemperature(m_targetTemperature);
     return true;
 }
 

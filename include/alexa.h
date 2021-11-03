@@ -2,6 +2,7 @@
 
 #include <SinricPro.h>
 #include <SinricProThermostat.h>
+#include <hwio.h>
 
 #ifdef ENABLE_DEBUG
 #define DEBUG_ESP_PORT Serial
@@ -20,6 +21,7 @@ class AlexaController{
         float m_targetTemperature;
         float m_currentTemperature;
         float m_currentHumidity;
+        HWIOController *m_hwio;
 
         bool onTargetTemperature(const String&, float&);
         bool onAdjustTargetTemperature(const String&, float&);
@@ -35,4 +37,6 @@ class AlexaController{
         void stop();
         bool isConnected();
         float getTargetTemperature();
+
+        AlexaController(HWIOController*);
 };

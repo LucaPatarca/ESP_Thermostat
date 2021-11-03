@@ -32,7 +32,7 @@ class MainController{
     private:
         bool m_boilerState;
         TemperatureController m_temperature;
-        AlexaController m_alexa;
+        AlexaController *m_alexa;
         HWIOController m_hwio;
         OTAController *m_ota;
         WifiController m_wifi;

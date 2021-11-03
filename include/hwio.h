@@ -15,6 +15,7 @@ class HWIOController{
         bool m_powerState;
         bool m_boilerState;
         Temperature m_temp;
+        float m_targetTemp;
         unsigned long m_nextUpdate;
         bool m_needsUpdate;
 
@@ -25,6 +26,7 @@ class HWIOController{
         void setPowerState(bool state);
         void setBoilerState(bool state);
         void setTemperature(Temperature temp);
+        void setTargetTemperature(float temp);
         void update();
 
         void wifiConnecting();

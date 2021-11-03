@@ -16,7 +16,7 @@ void HWIOController::setDisplay(int size){
     m_display->clearDisplay();
     m_display->setTextSize(size);
     m_display->setTextColor(WHITE);
-    m_display->setCursor(0, 10);
+    m_display->setCursor(0,0);
 }
 
 void HWIOController::setBoilerState(bool state)
@@ -46,16 +46,28 @@ void HWIOController::setTemperature(Temperature temp)
     m_temp = temp;
 }
 
+void HWIOController::setTargetTemperature(float temp)
+{
+    if (temp != m_targetTemp)
+    {
+        m_needsUpdate = true;
+    }
+    m_targetTemp = temp;
+}
+
 void HWIOController::update()
 {
     if (!m_needsUpdate)
     {
         return;
     }
-    setDisplay(1);
-    m_display->println(m_boilerState ? "ON" : "OFF");
-    m_display->printf("TEMPERATURA: %.1f C\n", m_temp.temp);
-    m_display->printf("UMIDITA: %.1f %%\n", m_temp.humidity);
+    setDisplay(3);
+    m_display->printf("%.1fC\n", m_temp.temp);
+    m_display->setTextSize(2);
+    if(m_powerState)
+        m_display->printf("%.1fC    ",m_targetTemp);
+    else
+        m_display->printf("--.-C    ");
     String trend = "";
     switch (m_temp.trend)
     {
@@ -71,7 +83,10 @@ void HWIOController::update()
     default:
         break;
     }
-    m_display->printf("TREND: %s", trend.c_str());
+    m_display->print(trend);
+    m_display->printf("\n%.1f%%    ", m_temp.humidity);
+    if(m_boilerState)
+        m_display->print("*");
     m_display->display();
     m_needsUpdate = false;
 }
