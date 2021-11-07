@@ -15,22 +15,58 @@
 // #define ENABLE_DEBUG
 
 #include <Arduino.h>
-#include <MainController.h>
+#include <wifi.h>
+#include <BoilerController.h>
+#include <hwio.h>
+#include <alexa.h>
+#include <ota.h>
+#include <temperature.h>
 
 #define BAUD_RATE 9600
 
-MainController *controller;
+BoilerController *thermostat;
+HWIOController *hwio;
+AlexaController *alexa;
+OTAController *ota;
+TemperatureController *temperature;
+WifiController *wifi;
 
 void setup()
 {
   Serial.begin(BAUD_RATE);
   Serial.printf("\r\n\r\n");
 
-  controller = new MainController();
+  hwio = new HWIOController();
+  thermostat = new BoilerController();
+  temperature = new TemperatureController();
+  wifi = new WifiController();
+  alexa = new AlexaController();
+  ota = new OTAController();
+
+  wifi->addListener(hwio);
+  wifi->connect();
+
+  thermostat->addListener(hwio);
+
+  temperature->addListener(alexa);
+  temperature->addListener(hwio);
+  temperature->addListener(thermostat);
+
+  alexa->addListener(hwio);
+  alexa->addListener(thermostat);
+  alexa->connect();
+
+  ota->addListener(alexa);
+  ota->addListener(hwio);
+  ota->connect();
+
+  hwio->init();
 }
 
 void loop()
 {
-  controller->handle();
-  delay(50);
+  alexa->handle();
+  ota->handle();
+  temperature->handle();
+  delay(100);
 }

@@ -1,39 +1,56 @@
 #include <ota.h>
 
-OTAController::OTAController(AlexaController *alexa, HWIOController *hwio)
+OTAController::OTAController()
 {
-    m_alexa = alexa;
-    m_hwio = hwio;
-
     ArduinoOTA.onStart([this]()
                        {
-                           Serial.println("Start update");
-                           m_alexa->stop();
+                           for (UpdateListener *listener : _listeners)
+                           {
+                               listener->onUpdateEvent({UpdateEventType::START, 0, ""});
+                           }
                        });
     ArduinoOTA.onEnd([this]()
-                     { 
-                         Serial.println("\nEnd update"); 
-                         m_hwio->updateComplete();
+                     {
+                         for (UpdateListener *listener : _listeners)
+                         {
+                             listener->onUpdateEvent({UpdateEventType::END, 100, ""});
+                         }
                      });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
                           {
-                              Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-                              m_hwio->updateProgress(progress / (total / 100));
+                              if (millis() > _updateTime)
+                              {
+                                  for (UpdateListener *listener : _listeners)
+                                  {
+                                      listener->onUpdateEvent({UpdateEventType::PROGRESS, ((float)progress / ((float)total / 100)), ""});
+                                  }
+                                  _updateTime = millis() + OTA_EVENT_INTERVAL;
+                              }
                           });
-    ArduinoOTA.onError([](ota_error_t error)
+    ArduinoOTA.onError([this](ota_error_t error)
                        {
-                           Serial.printf("Error[%u]: ", error);
+                           const char *message;
                            if (error == OTA_AUTH_ERROR)
-                               Serial.println("Auth Failed");
+                               message = "Auth Failed";
                            else if (error == OTA_BEGIN_ERROR)
-                               Serial.println("Begin Failed");
+                               message = "Begin Failed";
                            else if (error == OTA_CONNECT_ERROR)
-                               Serial.println("Connect Failed");
+                               message = "Connect Failed";
                            else if (error == OTA_RECEIVE_ERROR)
-                               Serial.println("Receive Failed");
+                               message = "Receive Failed";
                            else if (error == OTA_END_ERROR)
-                               Serial.println("End Failed");
+                               message = "End Failed";
+                           else
+                               message = "Unknown";
+                           for (UpdateListener *listener : _listeners)
+                           {
+                               listener->onUpdateEvent({UpdateEventType::ERROR, -1, message});
+                           }
                        });
+}
+
+void OTAController::connect()
+{
     ArduinoOTA.begin();
 }
 

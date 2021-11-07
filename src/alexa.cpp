@@ -1,49 +1,7 @@
 #include <alexa.h>
 #include <credentials.h>
 
-AlexaController::AlexaController(HWIOController *hwio){
-    m_hwio = hwio;
-}
-
-bool AlexaController::onPowerState(const String &deviceId, bool &state)
-{
-    Serial.printf("Thermostat %s turned %s\r\n", deviceId.c_str(), state ? "on" : "off");
-    m_powerState = state;
-    m_hwio->setPowerState(m_powerState);
-    return true;
-}
-
-bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &temperatureDelta)
-{
-    m_targetTemperature += temperatureDelta; // calculate absolut temperature
-    Serial.printf("Thermostat %s changed temperature about %f to %f", deviceId.c_str(), temperatureDelta, m_targetTemperature);
-    temperatureDelta = m_targetTemperature; // return absolut temperature
-    m_hwio->setTargetTemperature(m_targetTemperature);
-    return true;
-}
-
-bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemperature)
-{
-    Serial.printf("Thermostat %s set temperature to %f\r\n", deviceId.c_str(), newTemperature);
-    m_targetTemperature = newTemperature;
-    m_hwio->setTargetTemperature(m_targetTemperature);
-    return true;
-}
-
-bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
-{
-    Serial.printf("Thermostat %s set to mode %s\r\n", deviceId.c_str(), mode.c_str());
-    return true;
-}
-
-bool AlexaController::onSetSetting(const String &deviceId, const String &settingId, String &settingValue)
-{
-    Serial.printf("ricevuta impostazione %s con valore %s\n", settingId.c_str(), settingValue.c_str());
-    return true;
-}
-
-void AlexaController::setup()
-{
+void AlexaController::connect(){
     SinricProThermostat &local = SinricPro[THERMOSTAT_ID];
     local.onPowerState([this](const String &device, bool &mode)
                        { return this->onPowerState(device, mode); });
@@ -67,51 +25,85 @@ void AlexaController::setup()
     m_device = &local;
 }
 
+bool AlexaController::onPowerState(const String &deviceId, bool &state)
+{
+    Serial.printf("Thermostat %s turned %s\r\n", deviceId.c_str(), state ? "on" : "off");
+    for (StateListener *listener : _listeners)
+    {
+        listener->onPowerState(state);
+    }
+    return true;
+}
+
+bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &temperatureDelta)
+{
+    _targetTemperature += temperatureDelta; // calculate absolut temperature
+    Serial.printf("Thermostat %s changed temperature about %f to %f", deviceId.c_str(), temperatureDelta, _targetTemperature);
+    temperatureDelta = _targetTemperature; // return absolut temperature
+    for (StateListener *listener : _listeners)
+    {
+        listener->onTargetTemperature(_targetTemperature);
+    }
+    return true;
+}
+
+bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemperature)
+{
+    Serial.printf("Thermostat %s set temperature to %f\r\n", deviceId.c_str(), newTemperature);
+    _targetTemperature = newTemperature;
+    for (StateListener *listener : _listeners)
+    {
+        listener->onTargetTemperature(_targetTemperature);
+    }
+    return true;
+}
+
+bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
+{
+    Serial.printf("Thermostat %s set to mode %s\r\n", deviceId.c_str(), mode.c_str());
+    return true;
+}
+
+bool AlexaController::onSetSetting(const String &deviceId, const String &settingId, String &settingValue)
+{
+    Serial.printf("ricevuta impostazione %s con valore %s\n", settingId.c_str(), settingValue.c_str());
+    return true;
+}
+
 void AlexaController::handle()
 {
     SinricPro.handle();
 }
 
-bool AlexaController::isConnected()
+void AlexaController::onTargetTemperature(float temp)
 {
-    return SinricPro.isConnected();
+    _targetTemperature = temp;
+    m_device->sendTargetTemperatureEvent(temp);
 }
 
-void AlexaController::updateCurrentTemperature(float temp, float humidity)
+void AlexaController::onPowerState(bool state)
 {
-    if (
-        temp - m_currentTemperature > TEMP_UPDATE_THRESHOLD 
-        || m_currentTemperature - temp > TEMP_UPDATE_THRESHOLD 
-        || humidity - m_currentHumidity > HUMIDITY_UPDATE_THRESHOLD 
-        || m_currentHumidity - humidity > HUMIDITY_UPDATE_THRESHOLD
-        )
+    m_device->sendPowerStateEvent(state);
+}
+
+void AlexaController::onUpdateEvent(UpdateEvent event)
+{
+    if (event.type == UpdateEventType::START)
     {
-        m_device->sendTemperatureEvent(temp, humidity);
-        m_currentTemperature = temp;
-        m_currentHumidity = humidity;
+        SinricPro.stop();
     }
 }
 
-bool AlexaController::isOn()
+void AlexaController::onCurrentTemperature(Temperature_t temp)
 {
-    return m_powerState;
-}
-
-void AlexaController::setPowerState(bool state)
-{
-    if (state != m_powerState)
+    if (temp.temp - _lastSentTemp > TEMP_UPDATE_THRESHOLD || _lastSentTemp - temp.temp > TEMP_UPDATE_THRESHOLD)
     {
-        m_powerState = state;
-        m_device->sendPowerStateEvent(m_powerState);
+        m_device->sendTemperatureEvent(temp.temp, _lastSentHumidity);
+        _lastSentTemp = temp.temp;
     }
-}
-
-float AlexaController::getTargetTemperature()
-{
-    return m_targetTemperature;
-}
-
-void AlexaController::stop()
-{
-    SinricPro.stop();
+    else if (temp.humidity - _lastSentHumidity > HUMIDITY_UPDATE_THRESHOLD || _lastSentHumidity - temp.humidity > HUMIDITY_UPDATE_THRESHOLD)
+    {
+        m_device->sendTemperatureEvent(_lastSentTemp, temp.humidity);
+        _lastSentHumidity = temp.humidity;
+    }
 }

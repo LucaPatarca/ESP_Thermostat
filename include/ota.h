@@ -1,16 +1,20 @@
 #pragma once
 
-#include <alexa.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include <hwio.h>
+#include <EventEmitter.h>
+#include <UpdateListener.h>
 
-class OTAController{
-    private:
-        AlexaController *m_alexa;
-        HWIOController *m_hwio;
-    public:
-        OTAController(AlexaController*, HWIOController*);
-        void handle();
+#define OTA_EVENT_INTERVAL 500
+
+class OTAController : public EventEmitter<UpdateListener>
+{
+private:
+    unsigned long _updateTime;
+
+public:
+    OTAController();
+    void connect();
+    void handle();
 };

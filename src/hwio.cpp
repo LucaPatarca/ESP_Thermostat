@@ -3,73 +3,73 @@
 
 HWIOController::HWIOController()
 {
-    m_display = new Adafruit_SSD1306(128, 64, &Wire, -1);
+    _display = new Adafruit_SSD1306(128, 64, &Wire, -1);
 
-    if (!m_display->begin(SSD1306_SWITCHCAPVCC, 0x3C))
+    if (!_display->begin(SSD1306_SWITCHCAPVCC, 0x3C))
     {
         Serial.println(F("SSD1306 allocation failed"));
     }
-    delay(1500);
+    delay(100);
 }
 
-void HWIOController::setDisplay(int size){
-    m_display->clearDisplay();
-    m_display->setTextSize(size);
-    m_display->setTextColor(WHITE);
-    m_display->setCursor(0,0);
-}
-
-void HWIOController::setBoilerState(bool state)
+void HWIOController::setDisplay(int size, int x, int y)
 {
-    if (m_boilerState != state)
-    {
-        m_needsUpdate = true;
-    }
-    m_boilerState = state;
+    _display->setTextSize(size);
+    _display->setTextColor(WHITE, BLACK);
+    _display->setCursor(x, y);
 }
 
-void HWIOController::setPowerState(bool state)
+void HWIOController::onBoilerState(bool state)
 {
-    if (state != m_powerState)
-    {
-        m_needsUpdate = true;
-    }
-    m_powerState = state;
+#ifdef HWIO_DEBUG
+    Serial.printf("HWIOController::onBoilerState(%s)\n", state ? "true" : "false");
+#endif
+    setDisplay(2, 111, 40);
+    _display->print(state ? "*" : " ");
+    _display->display();
 }
 
-void HWIOController::setTemperature(Temperature temp)
+void HWIOController::onPowerState(bool state)
 {
-    if (temp.temp != m_temp.temp || temp.humidity != m_temp.humidity || temp.trend != m_temp.trend)
-    {
-        m_needsUpdate = true;
-    }
-    m_temp = temp;
-}
-
-void HWIOController::setTargetTemperature(float temp)
-{
-    if (temp != m_targetTemp)
-    {
-        m_needsUpdate = true;
-    }
-    m_targetTemp = temp;
-}
-
-void HWIOController::update()
-{
-    if (!m_needsUpdate)
-    {
-        return;
-    }
-    setDisplay(3);
-    m_display->printf("%.1fC\n", m_temp.temp);
-    m_display->setTextSize(2);
-    if(m_powerState)
-        m_display->printf("%.1fC    ",m_targetTemp);
+#ifdef HWIO_DEBUG
+    Serial.printf("HWIOController::onPowerState(%s)\n", state ? "true" : "false");
+#endif
+    setDisplay(2, 0, 24);
+    if (state)
+        _display->printf("%.1fC", _lastTargetTemp);
     else
-        m_display->printf("--.-C    ");
+        _display->printf("--.-C");
+    _lastPowerState = state;
+    _display->display();
+}
+
+void HWIOController::onTargetTemperature(float temp)
+{
+#ifdef HWIO_DEBUG
+    Serial.printf("HWIOController::onTargetTemperature(%.1f)\n", temp);
+#endif
+    if (_lastPowerState)
+    {
+        setDisplay(2, 0, 24);
+        _display->printf("%.1fC", temp);
+    }
+    _lastTargetTemp = temp;
+
+    _display->display();
+}
+
+void HWIOController::onCurrentTemperature(Temperature_t temp)
+{
+#ifdef HWIO_DEBUG
+    Serial.printf("HWIOController::onCurrentTemperature({%.1f, %.1f})\n", temp.temp, temp.humidity);
+#endif
+    setDisplay(3, 0, 0);
+    _display->printf("%.1fC", temp.temp);
+    setDisplay(2, 0, 40);
+    _display->printf("%.1f%%", temp.humidity);
+    setDisplay(2, 111, 24);
     String trend = "";
-    switch (m_temp.trend)
+    switch (TemperatureTrend::STABLE)
     {
     case TemperatureTrend::RISE:
         trend = "R";
@@ -83,46 +83,91 @@ void HWIOController::update()
     default:
         break;
     }
-    m_display->print(trend);
-    m_display->printf("\n%.1f%%    ", m_temp.humidity);
-    if(m_boilerState)
-        m_display->print("*");
-    m_display->display();
-    m_needsUpdate = false;
+    _display->print(trend);
+    _display->display();
 }
 
-void HWIOController::wifiConnecting()
+void HWIOController::init()
 {
-    setDisplay(2);
-    m_display->println("CONNECTING");
-    m_display->println(" WIFI...");
-    m_display->display();
+    _display->clearDisplay();
 }
 
-void HWIOController::wifiConnected()
+void HWIOController::onWiFiStatus(WiFiStatus status)
 {
-    setDisplay(2);
-    m_display->println("  WIFI");
-    m_display->println("CONNECTED");
-    m_display->display();
-}
-
-void HWIOController::updateProgress(float progress)
-{
-    if (millis() > m_nextUpdate)
+    switch (status)
     {
-        setDisplay(2);
-        m_display->println("UPDATING");
-        m_display->printf("   %u%%", (int)progress);
-        m_display->display();
-        m_nextUpdate = millis() + 500;
+    case WiFiStatus::CONNECTING:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onWiFiStatus(CONNECTING)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println("CONNECTING");
+        _display->println("  WIFI...");
+        _display->display();
+        break;
+    case WiFiStatus::CONNECTED:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onWiFiStatus(CONNECTED)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println("   WIFI");
+        _display->println("CONNECTED");
+        _display->display();
+        break;
+    case WiFiStatus::DISCONNECTED:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onWiFiStatus(DISCONNECTED)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println("   WIFI");
+        _display->println("DISCONNECT");
+        _display->display();
+
+    default:
+        break;
     }
 }
 
-void HWIOController::updateComplete()
+void HWIOController::onUpdateEvent(UpdateEvent_t event)
 {
-    setDisplay(2);
-    m_display->println(" UPDATE");
-    m_display->println("COMPLETE");
-    m_display->display();
+    switch (event.type)
+    {
+    case UpdateEventType::PROGRESS:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onUpdateEvent(PROGRESS)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println(" UPDATING");
+        _display->printf("   %u%%", (int)event.progress);
+        _display->display();
+        break;
+    case UpdateEventType::START:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onUpdateEvent(START)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println(" STARTING");
+        _display->println("  UPDATE");
+        _display->display();
+        break;
+    case UpdateEventType::END:
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::onUpdateEvent(END)\n");
+#endif
+        _display->clearDisplay();
+        setDisplay(2, 0, 18);
+        _display->println("  UPDATE");
+        _display->println(" COMPLETE");
+        _display->display();
+        break;
+
+    default:
+        break;
+    }
+    //TODO handle update error
 }

@@ -2,6 +2,11 @@
 
 #include <Adafruit_SSD1306.h>
 #include <temperature.h>
+#include <BoilerListener.h>
+#include <StateListener.h>
+#include <TemperatureListener.h>
+#include <UpdateListener.h>
+#include <WiFiListener.h>
 
 #define HWIO_DEBUG
 
@@ -9,29 +14,28 @@
 #define HWIO_DEBUG
 #endif
 
-class HWIOController{
-    private:
-        Adafruit_SSD1306 *m_display;
-        bool m_powerState;
-        bool m_boilerState;
-        Temperature m_temp;
-        float m_targetTemp;
-        unsigned long m_nextUpdate;
-        bool m_needsUpdate;
+class HWIOController : public BoilerListener, public StateListener, public TemperatureListener, public UpdateListener, public WiFiListener
+{
+private:
+    Adafruit_SSD1306 *_display;
+    float _lastTargetTemp;
+    float _lastPowerState;
 
-        void setDisplay(int size);
-    public:
-        HWIOController();
-        
-        void setPowerState(bool state);
-        void setBoilerState(bool state);
-        void setTemperature(Temperature temp);
-        void setTargetTemperature(float temp);
-        void update();
+    void setDisplay(int, int, int);
 
-        void wifiConnecting();
-        void wifiConnected();
+public:
+    HWIOController();
 
-        void updateProgress(float progress);
-        void updateComplete();
+    void onBoilerState(bool) override;
+
+    void onPowerState(bool) override;
+    void onTargetTemperature(float) override;
+
+    void onCurrentTemperature(Temperature_t) override;
+
+    void onUpdateEvent(UpdateEvent);
+
+    void onWiFiStatus(WiFiStatus);
+
+    void init();
 };

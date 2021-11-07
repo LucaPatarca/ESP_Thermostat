@@ -1,6 +1,8 @@
 #pragma once
 
 #include <DHT.h>
+#include <EventEmitter.h>
+#include <TemperatureListener.h>
 
 // #define TEMPERATURE_DEBUG
 
@@ -11,30 +13,24 @@
 #define SMOOTH_FACTOR 4
 #define SENSOR_PIN D5
 
-enum TemperatureTrend{
-    DROP,
-    RISE,
-    STABLE
-};
+#define TEMP_EVENT_INTERVAL 60000 //in milliseconds
 
-struct Temperature{
-    float temp;
-    float humidity;
-    TemperatureTrend trend;
-    float coefficient;
-};
+class TemperatureController : public EventEmitter<TemperatureListener>
+{
+private:
+    DHT *_sensor;
+    TemperatureTrend _lastTrend;
+    float _lastTemp;
+    float _smoothTemp;
+    int _stableCount;
+    unsigned long _updateTime;
 
-class TemperatureController{
-    private:
-        DHT *m_sensor;
-        TemperatureTrend m_lastTrend;
-        float m_lastTemp;
-        float m_smoothTemp;
-        int m_stableCount;
+    float smoothe(const float, const float);
+    TemperatureTrend computeTrend();
+    float computeCoefficient();
 
-        float smoothe(const float, const float);
-    public:
-        TemperatureController();
+public:
+    TemperatureController();
 
-        Temperature getTemperature();
+    void handle();
 };

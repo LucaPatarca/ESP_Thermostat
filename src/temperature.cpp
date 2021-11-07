@@ -1,63 +1,81 @@
 #include <Arduino.h>
 #include "temperature.h"
 
-TemperatureController::TemperatureController(){
-    m_sensor = new DHT(SENSOR_PIN, DHT22);
-    m_sensor->begin();
-    m_lastTrend = TemperatureTrend::STABLE;
-    m_lastTemp = 0;
-    m_stableCount = 0;
+TemperatureController::TemperatureController()
+{
+    _sensor = new DHT(SENSOR_PIN, DHT22);
+    _sensor->begin();
+    _lastTrend = TemperatureTrend::STABLE;
+    _lastTemp = 0;
+    _stableCount = 0;
 }
 
-Temperature TemperatureController::getTemperature()
+TemperatureTrend TemperatureController::computeTrend()
 {
-    float coefficient;
-    m_smoothTemp = smoothe(m_sensor->readTemperature(), m_smoothTemp);
-    float humidity = m_sensor->readHumidity();
-    if (m_smoothTemp > m_lastTemp)
-        coefficient = m_smoothTemp - m_lastTemp;
-    else
-        coefficient = m_lastTemp - m_smoothTemp;
-    if (m_smoothTemp - m_lastTemp > 0.1)
+    if (_smoothTemp - _lastTemp > 0.1)
     {
-        m_lastTrend = TemperatureTrend::RISE;
-        m_lastTemp = m_smoothTemp;
+        _lastTemp = _smoothTemp;
+        return TemperatureTrend::RISE;
     }
-    else if (m_lastTemp - m_smoothTemp > 0.1)
+    else if (_lastTemp - _smoothTemp > 0.1)
     {
-        m_lastTrend = TemperatureTrend::DROP;
-        m_lastTemp = m_smoothTemp;
+        _lastTemp = _smoothTemp;
+        return TemperatureTrend::DROP;
     }
     else
     {
-        if (m_lastTrend != TemperatureTrend::STABLE)
+        if (_lastTrend != TemperatureTrend::STABLE)
         {
-            m_stableCount++;
-            if (m_stableCount >= 5)
+            _stableCount++;
+            if (_stableCount >= 10)
             {
-                m_lastTrend = TemperatureTrend::STABLE;
-                m_lastTemp = m_smoothTemp;
-                m_stableCount = 0;
+                _lastTemp = _smoothTemp;
+                _stableCount = 0;
+                return TemperatureTrend::STABLE;
             }
         }
     }
+    return _lastTrend;
+}
 
-    //TODO arrotondare meglio
-    float rounded = static_cast<float>(static_cast<int>(m_lastTemp * 10.)) / 10.;
+float TemperatureController::computeCoefficient()
+{
+    if (_smoothTemp > _lastTemp)
+        return _smoothTemp - _lastTemp;
+    else
+        return _lastTemp - _smoothTemp;
+}
 
-    #ifdef TEMPERATURE_DEBUG
-    String s[] = {"Drop", "Rise", "Stable"};
-    Serial.printf("Temp: %f\nRounded: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", m_smoothTemp, rounded, s[m_lastTrend].c_str(), coefficient, humidity);
-    #endif
+void TemperatureController::handle()
+{
+    if (millis() > _updateTime)
+    {
+        _smoothTemp = smoothe(_sensor->readTemperature(), _smoothTemp);
+        float humidity = _sensor->readHumidity();
 
+        float coefficient = computeCoefficient();
+        _lastTrend = computeTrend();
 
-    return {rounded, humidity, m_lastTrend, coefficient};
+        //TODO arrotondare meglio
+        float rounded = static_cast<float>(static_cast<int>(_smoothTemp * 10.)) / 10.;
+
+#ifdef TEMPERATURE_DEBUG
+        String s[] = {"Drop", "Rise", "Stable"};
+        Serial.printf("Temp: %f\nRounded: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, rounded, s[_lastTrend].c_str(), coefficient, humidity);
+#endif
+
+        for (TemperatureListener *listener : _listeners)
+        {
+            listener->onCurrentTemperature({rounded, humidity, _lastTrend, coefficient});
+        }
+
+        _updateTime = millis() + TEMP_EVENT_INTERVAL;
+    }
 }
 
 float TemperatureController::smoothe(
-  const float input,
-  const float data
-) {
-  return (data == 0) ? input :
-    ((data * (SMOOTH_FACTOR - 1) + input) / SMOOTH_FACTOR);
+    const float input,
+    const float data)
+{
+    return (data == 0) ? input : ((data * (SMOOTH_FACTOR - 1) + input) / SMOOTH_FACTOR);
 }
