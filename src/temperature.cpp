@@ -6,33 +6,49 @@ TemperatureController::TemperatureController()
     _sensor = new DHT(SENSOR_PIN, DHT22);
     _sensor->begin();
     _lastTrend = TemperatureTrend::STABLE;
-    _lastTemp = 0;
+    _lastTemp = _sensor->readTemperature();
     _stableCount = 0;
 }
 
 TemperatureTrend TemperatureController::computeTrend()
 {
-    if (_smoothTemp - _lastTemp > 0.1)
+    if (_smoothTemp - _lastTemp > CHANGE_THRESHOLD)
     {
-        _lastTemp = _smoothTemp;
-        return TemperatureTrend::RISE;
+        _riseCount++;
+        if (_riseCount >= RISE_THRESHOLD)
+        {
+            _lastTemp = _smoothTemp;
+            _riseCount = 0;
+            _dropCount = 0;
+            _stableCount = 0;
+            return TemperatureTrend::RISE;
+        }
     }
-    else if (_lastTemp - _smoothTemp > 0.1)
+    else if (_lastTemp - _smoothTemp > CHANGE_THRESHOLD)
     {
-        _lastTemp = _smoothTemp;
-        return TemperatureTrend::DROP;
+        _dropCount++;
+        if (_dropCount >= DROP_THRESHOLD)
+        {
+            _lastTemp = _smoothTemp;
+            _dropCount = 0;
+            _riseCount = 0;
+            _stableCount = 0;
+            return TemperatureTrend::DROP;
+        }
     }
     else
     {
-        if (_lastTrend != TemperatureTrend::STABLE)
+        _stableCount++;
+        if (_stableCount >= STABLE_THRESHOLD)
         {
-            _stableCount++;
-            if (_stableCount >= 10)
+            if (_lastTrend != TemperatureTrend::STABLE)
             {
                 _lastTemp = _smoothTemp;
-                _stableCount = 0;
-                return TemperatureTrend::STABLE;
             }
+            _stableCount = 0;
+            _dropCount = 0;
+            _riseCount = 0;
+            return TemperatureTrend::STABLE;
         }
     }
     return _lastTrend;
@@ -56,9 +72,6 @@ void TemperatureController::handle()
         float coefficient = computeCoefficient();
         _lastTrend = computeTrend();
 
-        //TODO arrotondare meglio
-        float rounded = static_cast<float>(static_cast<int>(_smoothTemp * 10.)) / 10.;
-
 #ifdef TEMPERATURE_DEBUG
         String s[] = {"Drop", "Rise", "Stable"};
         Serial.printf("Temp: %f\nRounded: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, rounded, s[_lastTrend].c_str(), coefficient, humidity);
@@ -66,7 +79,7 @@ void TemperatureController::handle()
 
         for (TemperatureListener *listener : _listeners)
         {
-            listener->onCurrentTemperature({rounded, humidity, _lastTrend, coefficient});
+            listener->onCurrentTemperature({_smoothTemp, humidity, _lastTrend, coefficient});
         }
 
         _updateTime = millis() + TEMP_EVENT_INTERVAL;

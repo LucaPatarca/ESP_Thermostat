@@ -69,7 +69,7 @@ void HWIOController::onCurrentTemperature(Temperature_t temp)
     _display->printf("%.1f%%", temp.humidity);
     setDisplay(2, 111, 24);
     String trend = "";
-    switch (TemperatureTrend::STABLE)
+    switch (temp.trend)
     {
     case TemperatureTrend::RISE:
         trend = "R";

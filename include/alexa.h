@@ -14,7 +14,7 @@
 #define ALEXA_DEBUG
 #endif
 
-#define TEMP_UPDATE_THRESHOLD 0.1f
+#define TEMP_UPDATE_THRESHOLD 0.2f
 #define HUMIDITY_UPDATE_THRESHOLD 5
 
 class AlexaController : public EventEmitter<StateListener>, public TemperatureListener, public UpdateListener, public StateListener

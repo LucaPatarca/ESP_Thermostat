@@ -23,6 +23,11 @@
 #include <temperature.h>
 
 #define BAUD_RATE 9600
+#define ENABLE_LOG
+
+#ifdef ENABLE_LOG
+#include <logger.h>
+#endif
 
 BoilerController *thermostat;
 HWIOController *hwio;
@@ -30,6 +35,9 @@ AlexaController *alexa;
 OTAController *ota;
 TemperatureController *temperature;
 WifiController *wifi;
+#ifdef ENABLE_LOG
+  Logger *logger;
+#endif
 
 void setup()
 {
@@ -59,6 +67,13 @@ void setup()
   ota->addListener(alexa);
   ota->addListener(hwio);
   ota->connect();
+
+#ifdef ENABLE_LOG
+  logger = new Logger();
+  thermostat->addListener(logger);
+  alexa->addListener(logger);
+  temperature->addListener(logger);
+#endif
 
   hwio->init();
 }
