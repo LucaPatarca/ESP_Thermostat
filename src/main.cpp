@@ -21,6 +21,7 @@
 #include <alexa.h>
 #include <ota.h>
 #include <temperature.h>
+#include <program.h>
 
 #define BAUD_RATE 9600
 #define ENABLE_LOG
@@ -35,6 +36,8 @@ AlexaController *alexa;
 OTAController *ota;
 TemperatureController *temperature;
 WifiController *wifi;
+ProgramController *program;
+
 #ifdef ENABLE_LOG
   Logger *logger;
 #endif
@@ -50,6 +53,7 @@ void setup()
   wifi = new WifiController();
   alexa = new AlexaController();
   ota = new OTAController();
+  program = new ProgramController();
 
   wifi->addListener(hwio);
   wifi->connect();
@@ -62,11 +66,16 @@ void setup()
 
   alexa->addListener(hwio);
   alexa->addListener(thermostat);
+  alexa->addListener(program);
   alexa->connect();
 
   ota->addListener(alexa);
   ota->addListener(hwio);
   ota->connect();
+
+  program->addListener(hwio);
+  program->addListener(thermostat);
+  program->addListener(alexa);
 
 #ifdef ENABLE_LOG
   logger = new Logger();
@@ -83,5 +92,6 @@ void loop()
   alexa->handle();
   ota->handle();
   temperature->handle();
+  program->handle();
   delay(100);
 }

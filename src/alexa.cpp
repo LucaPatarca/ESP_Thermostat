@@ -60,7 +60,24 @@ bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemp
 
 bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
 {
-    Serial.printf("Thermostat %s set to mode %s\r\n", deviceId.c_str(), mode.c_str());
+    Serial.printf("Thermostat %s set mode to %s\r\n", deviceId.c_str(), mode.c_str());
+    if(mode == "AUTO")
+        for (StateListener *listener : _listeners)
+            listener->onThermostatMode(Mode::PROGRAM);
+    else if(mode == "HEAT"){
+        for (StateListener *listener : _listeners){
+            listener->onThermostatMode(Mode::ON);
+            listener->onPowerState(true);
+        }
+        m_device->sendPowerStateEvent(true);
+    }
+    else{
+        for (StateListener *listener : _listeners){
+            listener->onThermostatMode(Mode::OFF);
+            listener->onPowerState(false);
+        }
+        m_device->sendPowerStateEvent(false);
+    }
     return true;
 }
 
@@ -105,5 +122,25 @@ void AlexaController::onCurrentTemperature(Temperature_t temp)
     {
         m_device->sendTemperatureEvent(_lastSentTemp, temp.humidity);
         _lastSentHumidity = temp.humidity;
+    }
+}
+
+void AlexaController::onThermostatMode(Mode mode){
+    switch (mode)
+    {
+    case Mode::OFF:
+        m_device->sendPowerStateEvent(false);
+        m_device->sendThermostatModeEvent("OFF");
+        break;
+    case Mode::ON:
+        m_device->sendPowerStateEvent(true);
+        m_device->sendThermostatModeEvent("HEAT");
+        break;
+    case Mode::PROGRAM:
+        m_device->sendThermostatModeEvent("AUTO");
+        break;
+    
+    default:
+        break;
     }
 }

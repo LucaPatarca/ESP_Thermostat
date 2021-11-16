@@ -6,7 +6,7 @@ TemperatureController::TemperatureController()
     _sensor = new DHT(SENSOR_PIN, DHT22);
     _sensor->begin();
     _lastTrend = TemperatureTrend::STABLE;
-    _lastTemp = _sensor->readTemperature();
+    _lastTemp = 0;
     _stableCount = 0;
 }
 
@@ -67,6 +67,7 @@ void TemperatureController::handle()
     if (millis() > _updateTime)
     {
         _smoothTemp = smoothe(_sensor->readTemperature(), _smoothTemp);
+        if(_lastTemp==0) _lastTemp = _smoothTemp;
         float humidity = _sensor->readHumidity();
 
         float coefficient = computeCoefficient();
@@ -74,7 +75,7 @@ void TemperatureController::handle()
 
 #ifdef TEMPERATURE_DEBUG
         String s[] = {"Drop", "Rise", "Stable"};
-        Serial.printf("Temp: %f\nRounded: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, rounded, s[_lastTrend].c_str(), coefficient, humidity);
+        Serial.printf("Temp: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, s[_lastTrend].c_str(), coefficient, humidity);
 #endif
 
         for (TemperatureListener *listener : _listeners)

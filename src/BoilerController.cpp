@@ -99,3 +99,7 @@ TCase BoilerController::getTempCase()
         return TCase::ABOVE_TARGET;
     }
 }
+
+void BoilerController::onThermostatMode(Mode mode){
+    //nop
+}

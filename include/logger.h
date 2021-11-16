@@ -5,6 +5,7 @@
 #include <BoilerListener.h>
 #include <ESP8266HTTPClient.h>
 
+#define LOGGER_DEBUG
 
 class Logger : public StateListener, public TemperatureListener, public BoilerListener
 {
@@ -18,8 +19,9 @@ private:
 
     void _sendLog();
 public:
-    void onBoilerState(bool);
-    void onCurrentTemperature(Temperature);
-    void onPowerState(bool);
-    void onTargetTemperature(float);
+    void onBoilerState(bool) override;
+    void onCurrentTemperature(Temperature) override;
+    void onThermostatMode(Mode) override;
+    void onPowerState(bool) override;
+    void onTargetTemperature(float) override;
 };

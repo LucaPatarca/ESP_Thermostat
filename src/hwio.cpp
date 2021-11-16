@@ -171,3 +171,16 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
     }
     //TODO handle update error
 }
+
+void HWIOController::onThermostatMode(Mode mode)
+{
+    _lastMode = mode;
+    String s[] = {"S", "A", "P"};
+#ifdef HWIO_DEBUG
+    Serial.printf("HWIOController::onThermostatMode(%s)\n", s[_lastMode].c_str());
+#endif
+    setDisplay(2, 111, 8);
+    _display->printf("%s", s[_lastMode].c_str());
+
+    _display->display();
+}

@@ -6,32 +6,18 @@
 #define UTC_OFFSET 7200
 #define UPDATE_INTERVAL 1800000  //update every 30 minutes
 
-#ifdef ENABLE_DEBUG
-#define NTIME_DEBUG
-#endif
+// #define NTIME_DEBUG
 
-enum WeekDay{
-    LUNEDI,
-    MARTEDI,
-    MERCOLEDI,
-    GIOVEDI,
-    VENERDI,
-    SABATO,
-    DOMENICA
-};
-
-class TimeClass{
+class TimeController{
     private:
         WiFiUDP m_udp;
         NTPClient *m_client;
-        unsigned long m_updateTime;
+        unsigned long _lastUpdate;
         void checkUpdate();
 
     public:
-        TimeClass();
+        TimeController();
         void begin();
-        WeekDay getDayOfWeek();
-        int getHour();
+        int getDayOfWeek();
+        int getTime();
 };
-
-extern TimeClass Time;

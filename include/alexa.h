@@ -7,11 +7,10 @@
 #include <TemperatureListener.h>
 #include <UpdateListener.h>
 
-#ifdef ENABLE_DEBUG
+#ifdef ALEXA_DEBUG
 #define DEBUG_ESP_PORT Serial
 #define NODEBUG_WEBSOCKETS
 #define NDEBUG
-#define ALEXA_DEBUG
 #endif
 
 #define TEMP_UPDATE_THRESHOLD 0.2f
@@ -36,6 +35,7 @@ public:
     void onPowerState(bool) override;
     void onUpdateEvent(UpdateEvent) override;
     void onCurrentTemperature(Temperature_t) override;
+    void onThermostatMode(Mode) override;
 
     void connect();
     void handle();

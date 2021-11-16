@@ -1,30 +1,32 @@
 #include "ntime.h"
 
-TimeClass::TimeClass(){
+TimeController::TimeController(){
     m_client = new NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET);
 }
 
-void TimeClass::begin(){
+void TimeController::begin(){
     m_client->begin();
     m_client->update();
 }
 
-WeekDay TimeClass::getDayOfWeek(){
+int TimeController::getDayOfWeek(){
     checkUpdate();
-    int day = m_client->getDay()-1;
-    return static_cast<WeekDay>(day);
+    int day = (m_client->getDay() + 5)%6;
+    return day;
 }
 
-int TimeClass::getHour(){
+int TimeController::getTime(){
     checkUpdate();
-    return m_client->getHours();
+    int hour = m_client->getHours()*2;
+    int minutes = m_client->getMinutes();
+    if(minutes>=30)
+        hour+=1;
+    return hour;
 }
 
-void TimeClass::checkUpdate(){
-    if(millis() > m_updateTime){
+void TimeController::checkUpdate(){
+    if(millis()-_lastUpdate > UPDATE_INTERVAL){
         m_client->update();
-        m_updateTime = millis()+UPDATE_INTERVAL;
+        _lastUpdate = millis();
     }
 }
-
-TimeClass Time;

@@ -3,9 +3,7 @@
 #include <EventEmitter.h>
 #include <WiFiListener.h>
 
-#ifdef ENABLE_DEBUG
-#define WIFI_DEBUG
-#endif
+// #define WIFI_DEBUG
 
 class WifiController : public EventEmitter<WiFiListener>
 {

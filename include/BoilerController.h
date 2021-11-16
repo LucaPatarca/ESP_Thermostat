@@ -40,5 +40,6 @@ private:
 public:
     void onCurrentTemperature(Temperature_t) override;
     void onPowerState(bool) override;
+    void onThermostatMode(Mode) override;
     void onTargetTemperature(float) override;
 };

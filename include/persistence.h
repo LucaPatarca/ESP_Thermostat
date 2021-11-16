@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef ENABLE_DEBUG
-#define PERSISTENCE_DEBUG
-#endif
+// #define PERSISTENCE_DEBUG
 
 class PersistenceClass{
     public:
