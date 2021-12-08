@@ -12,5 +12,3 @@ class PersistenceClass{
 
         PersistenceClass();
 };
-
-extern PersistenceClass Persistence;

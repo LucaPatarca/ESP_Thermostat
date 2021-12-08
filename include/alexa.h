@@ -36,6 +36,7 @@ public:
     void onUpdateEvent(UpdateEvent) override;
     void onCurrentTemperature(Temperature_t) override;
     void onThermostatMode(Mode) override;
+    void onSetSetting(String, String) override;
 
     void connect();
     void handle();

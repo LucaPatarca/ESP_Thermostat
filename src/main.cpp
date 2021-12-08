@@ -24,7 +24,7 @@
 #include <program.h>
 
 #define BAUD_RATE 9600
-#define ENABLE_LOG
+// #define ENABLE_LOG
 
 #ifdef ENABLE_LOG
 #include <logger.h>

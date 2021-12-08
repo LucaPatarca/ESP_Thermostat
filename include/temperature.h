@@ -4,7 +4,7 @@
 #include <EventEmitter.h>
 #include <TemperatureListener.h>
 
-#define TEMPERATURE_DEBUG
+// #define TEMPERATURE_DEBUG
 
 #define SMOOTH_FACTOR 4
 #define SENSOR_PIN D5

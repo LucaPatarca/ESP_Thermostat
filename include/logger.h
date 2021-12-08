@@ -24,4 +24,5 @@ public:
     void onThermostatMode(Mode) override;
     void onPowerState(bool) override;
     void onTargetTemperature(float) override;
+    void onSetSetting(String, String) override;
 };

@@ -103,3 +103,7 @@ TCase BoilerController::getTempCase()
 void BoilerController::onThermostatMode(Mode mode){
     //nop
 }
+
+void BoilerController::onSetSetting(String key, String value){
+    //nop
+}

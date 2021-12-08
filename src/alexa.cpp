@@ -84,6 +84,9 @@ bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
 bool AlexaController::onSetSetting(const String &deviceId, const String &settingId, String &settingValue)
 {
     Serial.printf("ricevuta impostazione %s con valore %s\n", settingId.c_str(), settingValue.c_str());
+    for(StateListener *listener: _listeners){
+        listener->onSetSetting(settingId.c_str(), settingValue.c_str());
+    }
     return true;
 }
 
@@ -143,4 +146,8 @@ void AlexaController::onThermostatMode(Mode mode){
     default:
         break;
     }
+}
+
+void AlexaController::onSetSetting(String key, String value){
+    //nop
 }

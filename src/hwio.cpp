@@ -184,3 +184,7 @@ void HWIOController::onThermostatMode(Mode mode)
 
     _display->display();
 }
+
+void HWIOController::onSetSetting(String key, String value){
+    //nop
+}

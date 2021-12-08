@@ -28,6 +28,7 @@ public:
     void onPowerState(bool) override;
     void onTargetTemperature(float) override;
     void onThermostatMode(Mode) override;
+    void onSetSetting(String, String) override;
 
     void onCurrentTemperature(Temperature_t) override;
 
