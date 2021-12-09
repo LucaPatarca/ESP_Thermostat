@@ -3,8 +3,8 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-#define UTC_OFFSET 7200
-#define UPDATE_INTERVAL 1800000  //update every 30 minutes
+#define UTC_OFFSET 3600
+#define UPDATE_INTERVAL 1000 //update every second
 
 // #define NTIME_DEBUG
 
@@ -20,4 +20,5 @@ class TimeController{
         void begin();
         int getDayOfWeek();
         int getTime();
+        String getFormattedTime();
 };

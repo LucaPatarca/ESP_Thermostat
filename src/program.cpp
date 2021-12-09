@@ -51,6 +51,36 @@ bool ProgramController::saveProgram()
     return EEPROM.commit();
 }
 
+void ProgramController::applyProgram()
+{
+    float target = getTemperature(_lastDay, _lastTime);
+    for (StateListener *listener : _listeners)
+    {
+        if (target > 0)
+        {
+            listener->onTargetTemperature(target);
+            listener->onPowerState(true);
+        }
+        else
+        {
+            listener->onPowerState(false);
+        }
+    }
+
+#ifdef PROGRAM_DEBUG
+    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", _lastDay, _lastTime, _time.getFormattedTime().c_str(),target);
+    for (int d = 0; d < 7; d++)
+    {
+        Serial.printf("day: %d\n[ ", d);
+        for (int t = 0; t < 48; t++)
+        {
+            Serial.printf("%d: %.1f, ", t, getTemperature(d, t));
+        }
+        Serial.printf(" ]\n");
+    }
+#endif
+}
+
 void ProgramController::handle()
 {
     if (_mode == Mode::PROGRAM)
@@ -59,34 +89,9 @@ void ProgramController::handle()
         int time = _time.getTime();
         if (time != _lastTime || day != _lastDay)
         {
-            for (StateListener *listener : _listeners)
-            {
-                float target = getTemperature(time, day);
-                if (target > 0)
-                {
-                    listener->onTargetTemperature(target);
-                    listener->onPowerState(true);
-                }
-                else
-                {
-                    listener->onPowerState(false);
-                }
-            }
             _lastDay = day;
             _lastTime = time;
-
-#ifdef PROGRAM_DEBUG
-            Serial.printf("[ProgramController] day: %d time: %d\n", day, time);
-            for (int d = 0; d < 7; d++)
-            {
-                Serial.printf("day: %d\n[ ", d);
-                for (int t = 0; t < 48; t++)
-                {
-                    Serial.printf("%.1f, ", getTemperature(d, t));
-                }
-                Serial.printf(" ]\n");
-            }
-#endif
+            applyProgram();
         }
     }
 }
@@ -98,7 +103,12 @@ void ProgramController::onPowerState(bool state)
 
 void ProgramController::onTargetTemperature(float temp)
 {
-    //nop
+    if(_mode==Mode::PROGRAM){
+        for(StateListener *listener: _listeners){
+            listener->onThermostatMode(Mode::ON);
+            listener->onPowerState(true);
+        }
+    }
 }
 
 void ProgramController::onThermostatMode(Mode mode)
@@ -108,42 +118,95 @@ void ProgramController::onThermostatMode(Mode mode)
     _lastTime = -1;
 }
 
-void ProgramController::onSetSetting(String key, String value)
+ScheduleChange_t ProgramController::createEmptyChange()
 {
-    if (key =="ProgramEvent")
+    return {{0, 0, 0, 0, 0, 0, 0}, 0, 1, 0};
+}
+
+ScheduleChange_t ProgramController::parseChange(String value)
+{
+    DynamicJsonDocument doc(128);
+    char *noCopy = (char *)value.c_str();
+    DeserializationError error = deserializeJson(doc, noCopy, value.length());
+
+    ScheduleChange_t parsed = createEmptyChange();
+
+    if (error)
     {
-        DynamicJsonDocument doc(128);
-        char *noCopy = (char*)value.c_str();
-        DeserializationError error = deserializeJson(doc, noCopy, value.length());
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return parsed;
+    }
 
-        if (error)
-        {
-            Serial.print(F("deserializeJson() failed: "));
-            Serial.println(error.f_str());
-            return;
-        }
+    JsonArray days = doc["days"];
+    for (int d : days)
+    {
+        parsed.days[d] = 1;
+    }
 
-        int fromDay = doc["from"]["day"];   // 5
-        int fromTime = doc["from"]["time"]; // 29
+    parsed.fromTime = doc["fromHour"];
+    parsed.toTime = doc["toHour"];
 
-        int toDay = doc["to"]["day"];   // 5
-        int toTime = doc["to"]["time"]; // 37
-
-        float temp = doc["temp"]; // 20.8
+    parsed.temp = doc["temp"]; // 20.8
 
 #ifdef PROGRAM_DEBUG
-        Serial.printf("from: %d - %d, to: %d - %d, %.1f\n", fromDay, fromTime, toDay, toTime, temp);
+    Serial.printf("days:[");
+    for (int d : days)
+    {
+        Serial.printf("%d, ", d);
+    }
+    Serial.printf("], from: %d, to: %d, %.1f C\n", parsed.fromTime, parsed.toTime, parsed.temp);
 #endif
 
-        for (int d = fromDay; d <= toDay; d++)
+    return parsed;
+}
+
+void ProgramController::addScheduleChange(ScheduleChange_t change)
+{
+    for (int i = 0; i < 7; i++)
+    {
+        if (change.days[i])
         {
-            for (int t = fromTime; t <= toTime; t++)
+            for (int t = change.fromTime; t <= change.toTime; t++)
             {
-                putTemperature(d,t,temp);
+                putTemperature(i, t, change.temp);
             }
         }
+    }
 
-        saveProgram();
-        loadProgram();
+    saveProgram();
+    loadProgram();
+    applyProgram();
+}
+
+void ProgramController::removeScheduleChange(ScheduleChange_t change)
+{
+    for (int i = 0; i < 7; i++)
+    {
+        if (change.days[i])
+        {
+            for (int t = change.fromTime; t <= change.toTime; t++)
+            {
+                putTemperature(i, t, 0);
+            }
+        }
+    }
+
+    saveProgram();
+    loadProgram();
+    applyProgram();
+}
+
+void ProgramController::onSetSetting(String key, String value)
+{
+    if (key == "ScheduleChange")
+    {
+        ScheduleChange_t change = parseChange(value);
+        addScheduleChange(change);
+    }
+    else if (key == "ScheduleChangeRemove")
+    {
+        ScheduleChange_t change = parseChange(value);
+        removeScheduleChange(change);
     }
 }

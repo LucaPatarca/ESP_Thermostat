@@ -6,7 +6,7 @@
 #include <EventEmitter.h>
 #include <UpdateListener.h>
 
-#define OTA_EVENT_INTERVAL 500
+#define OTA_EVENT_INTERVAL 100
 
 class OTAController : public EventEmitter<UpdateListener>
 {

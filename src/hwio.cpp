@@ -139,10 +139,7 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
 #ifdef HWIO_DEBUG
         Serial.printf("HWIOController::onUpdateEvent(PROGRESS)\n");
 #endif
-        _display->clearDisplay();
-        setDisplay(2, 0, 18);
-        _display->println(" UPDATING");
-        _display->printf("   %u%%", (int)event.progress);
+        _display->fillRect(14,40,(int)event.progress,10,WHITE);
         _display->display();
         break;
     case UpdateEventType::START:
@@ -151,8 +148,8 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
 #endif
         _display->clearDisplay();
         setDisplay(2, 0, 18);
-        _display->println(" STARTING");
-        _display->println("  UPDATE");
+        _display->println(" UPDATING");
+        _display->drawRect(14,40,100,10,WHITE);
         _display->display();
         break;
     case UpdateEventType::END:

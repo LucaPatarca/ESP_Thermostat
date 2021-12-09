@@ -1,18 +1,20 @@
 #include <wifi.h>
 #include <credentials.h>
 
-#ifdef ESP8266
-#include <ESP8266WiFi.h>
-#endif
-#ifdef ESP32
-#include <WiFi.h>
-#endif
-
-void WifiController::notifiStatus(WiFiStatus status){
+void WifiController::notifiStatus(WiFiStatus status)
+{
     for (WiFiListener *listener : _listeners)
     {
         listener->onWiFiStatus(status);
     }
+}
+
+void WifiController::onWiFiConnect(const WiFiEventStationModeGotIP &event)
+{
+}
+
+void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &event)
+{
 }
 
 void WifiController::connect()
@@ -28,6 +30,7 @@ void WifiController::connect()
         Serial.printf(".");
         delay(250);
     }
+    //TODO implementare listener
     IPAddress localIP = WiFi.localIP();
     Serial.printf("connected!\r\n[WiFi]: IP-Address is %d.%d.%d.%d\r\n", localIP[0], localIP[1], localIP[2], localIP[3]);
 

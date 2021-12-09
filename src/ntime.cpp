@@ -11,7 +11,7 @@ void TimeController::begin(){
 
 int TimeController::getDayOfWeek(){
     checkUpdate();
-    int day = (m_client->getDay() + 5)%6;
+    int day = (m_client->getDay() + 6)%7;
     return day;
 }
 
@@ -29,4 +29,8 @@ void TimeController::checkUpdate(){
         m_client->update();
         _lastUpdate = millis();
     }
+}
+
+String TimeController::getFormattedTime(){
+    return m_client->getFormattedTime();
 }

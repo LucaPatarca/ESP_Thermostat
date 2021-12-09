@@ -14,6 +14,13 @@ typedef struct WeekProgram {
     DayProgram_t days[7];
 } WeekProgram_t;
 
+typedef struct ScheduleChange{
+    int days[7];
+    int fromTime;
+    int toTime;
+    float temp;
+} ScheduleChange_t;
+
 class ProgramController: public EventEmitter<StateListener>, public StateListener
 {
 private:
@@ -28,6 +35,13 @@ private:
 
     WeekProgram loadProgram();
     bool saveProgram();
+
+    ScheduleChange_t createEmptyChange();
+    ScheduleChange_t parseChange(String value);
+    void addScheduleChange(ScheduleChange_t change);
+    void removeScheduleChange(ScheduleChange_t change);
+
+    void applyProgram();
 public:
     ProgramController();
 

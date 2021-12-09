@@ -31,6 +31,7 @@ bool AlexaController::onPowerState(const String &deviceId, bool &state)
     for (StateListener *listener : _listeners)
     {
         listener->onPowerState(state);
+        listener->onThermostatMode(state?Mode::ON:Mode::OFF);
     }
     return true;
 }
@@ -83,7 +84,7 @@ bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
 
 bool AlexaController::onSetSetting(const String &deviceId, const String &settingId, String &settingValue)
 {
-    Serial.printf("ricevuta impostazione %s con valore %s\n", settingId.c_str(), settingValue.c_str());
+    Serial.printf("ricevuta impostazione '%s' con valore '%s'\n", settingId.c_str(), settingValue.c_str());
     for(StateListener *listener: _listeners){
         listener->onSetSetting(settingId.c_str(), settingValue.c_str());
     }
@@ -132,11 +133,9 @@ void AlexaController::onThermostatMode(Mode mode){
     switch (mode)
     {
     case Mode::OFF:
-        m_device->sendPowerStateEvent(false);
         m_device->sendThermostatModeEvent("OFF");
         break;
     case Mode::ON:
-        m_device->sendPowerStateEvent(true);
         m_device->sendThermostatModeEvent("HEAT");
         break;
     case Mode::PROGRAM:
