@@ -56,6 +56,8 @@ void setup()
   program = new ProgramController();
 
   wifi->addListener(hwio);
+  wifi->addListener(alexa);
+  wifi->addListener(ota);
   wifi->connect();
 
   thermostat->addListener(hwio);
@@ -67,11 +69,11 @@ void setup()
   alexa->addListener(hwio);
   alexa->addListener(thermostat);
   alexa->addListener(program);
-  alexa->connect();
+  // alexa->connect();
 
   ota->addListener(alexa);
   ota->addListener(hwio);
-  ota->connect();
+  // ota->connect();
 
   program->addListener(hwio);
   program->addListener(thermostat);
@@ -93,5 +95,6 @@ void loop()
   ota->handle();
   temperature->handle();
   program->handle();
+  hwio->handle();
   delay(100);
 }

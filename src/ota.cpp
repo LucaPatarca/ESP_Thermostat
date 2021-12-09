@@ -47,14 +47,36 @@ OTAController::OTAController()
                                listener->onUpdateEvent({UpdateEventType::ERROR, -1, message});
                            }
                        });
+    _isConnected = false;
+}
+
+void OTAController::onWiFiStatus(WiFiStatus status)
+{
+    if(status == WiFiStatus::CONNECTED){
+        connect();
+    }
+    else if(status == WiFiStatus::DISCONNECTED)
+    {
+        _isConnected = false;
+    }
 }
 
 void OTAController::connect()
 {
+    #ifdef OTA_DEBUG
+    Serial.printf("[OTAController] connecting...\n");
+    #endif
     ArduinoOTA.begin();
+    _isConnected = true;
+    #ifdef OTA_DEBUG
+    Serial.printf("[OTAController] connected\n");
+    #endif
 }
 
 void OTAController::handle()
 {
-    ArduinoOTA.handle();
+    if (_isConnected)
+    {
+        ArduinoOTA.handle();
+    }
 }

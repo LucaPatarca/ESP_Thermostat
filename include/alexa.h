@@ -6,6 +6,9 @@
 #include <StateListener.h>
 #include <TemperatureListener.h>
 #include <UpdateListener.h>
+#include <WiFiListener.h>
+
+// #define ALEXA_DEBUG
 
 #ifdef ALEXA_DEBUG
 #define DEBUG_ESP_PORT Serial
@@ -16,13 +19,14 @@
 #define TEMP_UPDATE_THRESHOLD 0.2f
 #define HUMIDITY_UPDATE_THRESHOLD 5
 
-class AlexaController : public EventEmitter<StateListener>, public TemperatureListener, public UpdateListener, public StateListener
+class AlexaController : public EventEmitter<StateListener>, public TemperatureListener, public UpdateListener, public StateListener, public WiFiListener
 {
 private:
     SinricProThermostat *m_device;
     float _targetTemperature;
     float _lastSentTemp;
     float _lastSentHumidity;
+    bool _wifiConnected;
 
     bool onTargetTemperature(const String &, float &);
     bool onAdjustTargetTemperature(const String &, float &);
@@ -31,12 +35,15 @@ private:
     bool onSetSetting(const String &, const String &, String &);
 
 public:
+    AlexaController();
+
     void onTargetTemperature(float) override;
     void onPowerState(bool) override;
     void onUpdateEvent(UpdateEvent) override;
     void onCurrentTemperature(Temperature_t) override;
     void onThermostatMode(Mode) override;
     void onSetSetting(String, String) override;
+    void onWiFiStatus(WiFiStatus status) override;
 
     void connect();
     void handle();

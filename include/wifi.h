@@ -10,15 +10,19 @@
 #include <WiFi.h>
 #endif
 
-// #define WIFI_DEBUG
+#define WIFI_DEBUG
 
 class WifiController : public EventEmitter<WiFiListener>
 {
 private:
+    WiFiEventHandler wifiConnectHandler;
+    WiFiEventHandler wifiDisconnectHandler;
+
     void notifiStatus(WiFiStatus);
 
     void onWiFiConnect(const WiFiEventStationModeGotIP&);
     void onWiFiDisconnect(const WiFiEventStationModeDisconnected&);
 public:
+    WifiController();
     void connect();
 };

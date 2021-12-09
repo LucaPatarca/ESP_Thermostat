@@ -4,7 +4,7 @@
 #include <StateListener.h>
 #include <ntime.h>
 
-#define PROGRAM_DEBUG
+// #define PROGRAM_DEBUG
 
 typedef struct DayProgram{
     unsigned char temps[48];

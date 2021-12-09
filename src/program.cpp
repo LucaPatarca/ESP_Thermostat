@@ -53,6 +53,9 @@ bool ProgramController::saveProgram()
 
 void ProgramController::applyProgram()
 {
+#ifdef PROGRAM_DEBUG
+    Serial.printf("ProgramController::applyProgram()\n");
+#endif
     float target = getTemperature(_lastDay, _lastTime);
     for (StateListener *listener : _listeners)
     {
@@ -68,7 +71,7 @@ void ProgramController::applyProgram()
     }
 
 #ifdef PROGRAM_DEBUG
-    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", _lastDay, _lastTime, _time.getFormattedTime().c_str(),target);
+    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", _lastDay, _lastTime, _time.getFormattedTime().c_str(), target);
     for (int d = 0; d < 7; d++)
     {
         Serial.printf("day: %d\n[ ", d);
@@ -103,8 +106,10 @@ void ProgramController::onPowerState(bool state)
 
 void ProgramController::onTargetTemperature(float temp)
 {
-    if(_mode==Mode::PROGRAM){
-        for(StateListener *listener: _listeners){
+    if (_mode == Mode::PROGRAM)
+    {
+        for (StateListener *listener : _listeners)
+        {
             listener->onThermostatMode(Mode::ON);
             listener->onPowerState(true);
         }
