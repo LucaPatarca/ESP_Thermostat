@@ -1,4 +1,4 @@
-#include "ntime.h"
+#include <ntime.h>
 
 TimeController::TimeController()
 {
@@ -6,39 +6,25 @@ TimeController::TimeController()
     Serial.printf("[TimeController] created\n");
 #endif
     m_client = new NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET);
+    m_client->begin();
 }
 
 void TimeController::begin()
 {
-#ifdef NTIME_DEBUG
-    Serial.printf("[TimeController] begin\n");
-#endif
-    m_client->begin();
-    m_client->update();
+// #ifdef NTIME_DEBUG
+//     Serial.printf("[TimeController] begin\n");
+// #endif
+//     m_client->begin();
+//     m_client->update();
 }
 
-int TimeController::getDayOfWeek()
+Time_t TimeController::getTime()
 {
     checkUpdate();
     int day = (m_client->getDay() + 6) % 7;
-#ifdef NTIME_DEBUG
-    Serial.printf("[TimeController] get day %d\n", day);
-#endif
-    return day;
-}
-
-int TimeController::getTime()
-{
-    checkUpdate();
-    int hour = m_client->getHours() * 2;
-    int minutes = m_client->getMinutes();
-    if (minutes >= 30)
-        hour += 1;
-
-#ifdef NTIME_DEBUG
-    Serial.printf("[TimeController] get time %d\n", hour);
-#endif
-    return hour;
+    int hour = m_client->getHours();
+    int min = m_client->getMinutes();
+    return {hour, min, day};
 }
 
 void TimeController::checkUpdate()

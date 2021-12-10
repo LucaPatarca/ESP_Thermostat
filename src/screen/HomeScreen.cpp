@@ -10,7 +10,6 @@
 
 HomeScreen::HomeScreen(Adafruit_SSD1306 *display) : Screen(display)
 {
-    _wifiIcon = new WifiIcon(_display);
     _targetTemp = new TargetTemp(_display);
     _currentTemp = new CurrentTemp(_display);
     _currentHumidity = new CurrentHumidity(_display);
@@ -55,14 +54,8 @@ void HomeScreen::onCurrentTemperature(Temperature_t temp)
     _tempTrend->setStatus(temp.trend);
 }
 
-void HomeScreen::onWiFiStatus(WiFiStatus status)
-{
-    _wifiIcon->setStatus(status);
-}
-
 void HomeScreen::draw()
 {
-    _wifiIcon->draw();
     _targetTemp->draw();
     _currentTemp->draw();
     _currentHumidity->draw();
@@ -72,7 +65,6 @@ void HomeScreen::draw()
 }
 
 void HomeScreen::refresh(){
-    _wifiIcon->refresh();
     _targetTemp->refresh();
     _currentTemp->refresh();
     _currentHumidity->refresh();

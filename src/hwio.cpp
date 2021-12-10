@@ -11,8 +11,10 @@ HWIOController::HWIOController()
     }
     _homeScreen = new HomeScreen(_display);
     _updateScreen = new UpdateScreen(_display);
+    _timeScreen = new TimeScreen(_display);
     _activeScreen = _homeScreen;
     delay(100);
+    _display->dim(true);
 }
 
 void HWIOController::_setActiveScreen(Screen *screen)
@@ -64,7 +66,7 @@ void HWIOController::init()
 
 void HWIOController::onWiFiStatus(WiFiStatus status)
 {
-    _homeScreen->onWiFiStatus(status);
+    _timeScreen->onWiFiStatus(status);
 }
 
 void HWIOController::onUpdateEvent(UpdateEvent_t event)
@@ -79,10 +81,12 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
     _updateScreen->onUpdateEvent(event);
 
     /*
-    * needs to be called inside this method becouse during update
-    * every handle() method is blocked by the update operation
-    */
-    handle();
+     * needs to be called inside this method becouse during update
+     * every handle() method is blocked by the update operation
+     */
+    _activeScreen->draw();
+
+    _display->display();
 }
 
 void HWIOController::onThermostatMode(Mode mode)
@@ -97,6 +101,18 @@ void HWIOController::onSetSetting(String key, String value)
 
 void HWIOController::handle()
 {
+    if (millis() > _lastChange + SCREEN_INTERVAL)
+    {
+#ifdef HWIO_DEBUG
+        Serial.printf("HWIOController::changeScreen()\n");
+#endif
+        if (_activeScreen == _homeScreen)
+            _setActiveScreen(_timeScreen);
+        else
+            _setActiveScreen(_homeScreen);
+
+        _lastChange = millis();
+    }
     _activeScreen->draw();
 
     _display->display();

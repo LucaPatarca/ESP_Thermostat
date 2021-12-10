@@ -26,7 +26,6 @@ class ProgramController: public EventEmitter<StateListener>, public StateListene
 private:
     WeekProgram _program;
     Mode _mode;
-    TimeController _time;
     int _lastDay;
     int _lastTime;
 

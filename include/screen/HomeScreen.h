@@ -9,12 +9,11 @@
 
 //TODO continuare
 
-class HomeScreen: public Screen, public BoilerListener, public StateListener, public TemperatureListener, public WiFiListener {
+class HomeScreen: public Screen, public BoilerListener, public StateListener, public TemperatureListener {
 private:
     float _lastTargetTemp;
     float _lastPowerState;
 
-    ScreenElement<WiFiStatus> *_wifiIcon;
     ScreenElement<float> *_targetTemp;
     ScreenElement<float> *_currentTemp;
     ScreenElement<float> *_currentHumidity;
@@ -30,7 +29,6 @@ public:
     void onThermostatMode(Mode) override;
     void onSetSetting(String, String) override;
     void onCurrentTemperature(Temperature_t) override;
-    void onWiFiStatus(WiFiStatus) override;
 
     void draw() override;
     void refresh() override;

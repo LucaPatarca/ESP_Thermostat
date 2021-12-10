@@ -4,8 +4,8 @@
 
 ProgramController::ProgramController()
 {
-    _lastDay = _time.getDayOfWeek();
-    _lastTime = _time.getTime();
+    _lastDay = -1;
+    _lastTime = -1;
 #ifdef PROGRAM_DEBUG
     Serial.printf("[ProgramController] EEPROM.begin(%d)\n", sizeof(WeekProgram));
 #endif
@@ -88,12 +88,12 @@ void ProgramController::handle()
 {
     if (_mode == Mode::PROGRAM)
     {
-        int day = _time.getDayOfWeek();
-        int time = _time.getTime();
-        if (time != _lastTime || day != _lastDay)
+        Time_t time = Time->getTime();
+        int programTime = (time.hour*2)+(time.minutes>=30?1:0);
+        if (programTime != _lastTime || time.day != _lastDay)
         {
-            _lastDay = day;
-            _lastTime = time;
+            _lastDay = time.day;
+            _lastTime = programTime;
             applyProgram();
         }
     }

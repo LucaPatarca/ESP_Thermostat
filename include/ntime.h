@@ -8,6 +8,15 @@
 
 // #define NTIME_DEBUG
 
+typedef struct Time{
+    int hour;
+    int minutes;
+    int day;
+    bool operator !=(Time &rhs) const {
+        return this->hour != rhs.hour && this->minutes != rhs.minutes && this->day != rhs.day;
+    }
+} Time_t;
+
 class TimeController{
     private:
         WiFiUDP m_udp;
@@ -18,7 +27,8 @@ class TimeController{
     public:
         TimeController();
         void begin();
-        int getDayOfWeek();
-        int getTime();
+        Time_t getTime();
         String getFormattedTime();
 };
+
+extern TimeController *Time;

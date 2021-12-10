@@ -4,6 +4,7 @@
 #include <StateListener.h>
 #include <TemperatureListener.h>
 #include <UpdateListener.h>
+#include <screen/components/Clock.h>
 
 template<typename Status>
 ScreenElement<Status>::ScreenElement(Adafruit_SSD1306 *display)
@@ -48,6 +49,7 @@ template class ScreenElement<WiFiStatus>;
 template class ScreenElement<Mode>;
 template class ScreenElement<TemperatureTrend>;
 template class ScreenElement<UpdateEvent_t>;
+template class ScreenElement<Time_t>;
 template class ScreenElement<float>;
 template class ScreenElement<bool>;
 template class ScreenElement<int>;

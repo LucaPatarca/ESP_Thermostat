@@ -37,6 +37,7 @@ OTAController *ota;
 TemperatureController *temperature;
 WifiController *wifi;
 ProgramController *program;
+TimeController *Time;
 
 #ifdef ENABLE_LOG
   Logger *logger;
@@ -46,6 +47,8 @@ void setup()
 {
   Serial.begin(BAUD_RATE);
   Serial.printf("\r\n\r\n");
+
+  Time = new TimeController();
 
   hwio = new HWIOController();
   thermostat = new BoilerController();

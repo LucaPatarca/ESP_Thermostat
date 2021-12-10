@@ -9,16 +9,20 @@
 #include <WiFiListener.h>
 #include <screen/HomeScreen.h>
 #include <screen/UpdateScreen.h>
+#include <screen/TimeScreen.h>
 
-// #define HWIO_DEBUG 
+#define HWIO_DEBUG 
+#define SCREEN_INTERVAL 8000
 
 class HWIOController : public BoilerListener, public StateListener, public TemperatureListener, public UpdateListener, public WiFiListener
 {
 private:
     Adafruit_SSD1306 *_display;
+    unsigned long _lastChange;
     
     HomeScreen *_homeScreen;
     UpdateScreen *_updateScreen;
+    TimeScreen *_timeScreen;
     
     Screen *_activeScreen;
 

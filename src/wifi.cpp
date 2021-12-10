@@ -1,5 +1,6 @@
 #include <wifi.h>
 #include <credentials.h>
+#include <ntime.h>
 
 WifiController::WifiController()
 {
@@ -35,7 +36,8 @@ void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &ev
     Serial.printf("\r\n[Wifi]: Disconnected\n");
 #endif
     notifiStatus(WiFiStatus::DISCONNECTED);
-    connect();
+    WiFi.disconnect();
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
 }
 
 void WifiController::connect()
