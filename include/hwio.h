@@ -7,7 +7,8 @@
 #include <TemperatureListener.h>
 #include <UpdateListener.h>
 #include <WiFiListener.h>
-#include <screen/ScreenElement.h>
+#include <screen/HomeScreen.h>
+#include <screen/UpdateScreen.h>
 
 // #define HWIO_DEBUG 
 
@@ -15,22 +16,17 @@ class HWIOController : public BoilerListener, public StateListener, public Tempe
 {
 private:
     Adafruit_SSD1306 *_display;
-    float _lastTargetTemp;
-    float _lastPowerState;
-    Mode _lastMode;
+    
+    HomeScreen *_homeScreen;
+    UpdateScreen *_updateScreen;
+    
+    Screen *_activeScreen;
 
-    ScreenElement<WiFiStatus> *_wifiIcon;
-    ScreenElement<float> *_targetTemp;
-    ScreenElement<float> *_currentTemp;
-    ScreenElement<float> *_currentHumidity;
-
-    void setDisplay(int, int, int);
-
+    void _setActiveScreen(Screen *screen);
 public:
     HWIOController();
 
     void onBoilerState(bool) override;
-
     void onPowerState(bool) override;
     void onTargetTemperature(float) override;
     void onThermostatMode(Mode) override;

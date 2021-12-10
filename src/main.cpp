@@ -69,11 +69,9 @@ void setup()
   alexa->addListener(hwio);
   alexa->addListener(thermostat);
   alexa->addListener(program);
-  // alexa->connect();
 
   ota->addListener(alexa);
   ota->addListener(hwio);
-  // ota->connect();
 
   program->addListener(hwio);
   program->addListener(thermostat);

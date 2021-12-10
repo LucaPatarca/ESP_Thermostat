@@ -15,6 +15,7 @@ public:
 
     void setStatus(Status status);
     void draw();
+    void refresh();
 
     virtual void drawImpl() = 0;
 };
