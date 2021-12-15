@@ -22,6 +22,7 @@
 #include <ota.h>
 #include <temperature.h>
 #include <program.h>
+#include <input.h>
 
 #define BAUD_RATE 9600
 // #define ENABLE_LOG
@@ -38,6 +39,7 @@ TemperatureController *temperature;
 WifiController *wifi;
 ProgramController *program;
 TimeController *Time;
+InputController *input;
 
 #ifdef ENABLE_LOG
   Logger *logger;
@@ -46,7 +48,6 @@ TimeController *Time;
 void setup()
 {
   Serial.begin(BAUD_RATE);
-  Serial.printf("\r\n\r\n");
 
   Time = new TimeController();
 
@@ -57,6 +58,7 @@ void setup()
   alexa = new AlexaController();
   ota = new OTAController();
   program = new ProgramController();
+  input = new InputController();
 
   wifi->addListener(hwio);
   wifi->addListener(alexa);
@@ -72,6 +74,7 @@ void setup()
   alexa->addListener(hwio);
   alexa->addListener(thermostat);
   alexa->addListener(program);
+  alexa->addListener(input);
 
   ota->addListener(alexa);
   ota->addListener(hwio);
@@ -79,6 +82,12 @@ void setup()
   program->addListener(hwio);
   program->addListener(thermostat);
   program->addListener(alexa);
+  program->addListener(input);
+
+  input->addListener(alexa);
+  input->addListener(hwio);
+  input->addListener(thermostat);
+  input->addListener(program);
 
 #ifdef ENABLE_LOG
   logger = new Logger();
@@ -97,5 +106,6 @@ void loop()
   temperature->handle();
   program->handle();
   hwio->handle();
+  input->handle();
   delay(100);
 }

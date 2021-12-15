@@ -91,7 +91,7 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
 
 void HWIOController::onThermostatMode(Mode mode)
 {
-    _homeScreen->onThermostatMode(mode);
+    _timeScreen->onThermostatMode(mode);
 }
 
 void HWIOController::onSetSetting(String key, String value)

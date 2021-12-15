@@ -11,7 +11,7 @@
 #include <screen/UpdateScreen.h>
 #include <screen/TimeScreen.h>
 
-#define HWIO_DEBUG 
+// #define HWIO_DEBUG 
 #define SCREEN_INTERVAL 8000
 
 class HWIOController : public BoilerListener, public StateListener, public TemperatureListener, public UpdateListener, public WiFiListener

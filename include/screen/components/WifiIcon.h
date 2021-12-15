@@ -1,11 +1,15 @@
 #pragma once
 
 #include <WiFiListener.h>
-#include <Adafruit_SSD1306.h>
-#include <screen/ScreenElement.h>
+#include <screen/AnimatedScreenElement.h>
 
-class WifiIcon : public ScreenElement<WiFiStatus>{
+#define BAR1 0
+#define BAR2 1
+#define BAR3 2
+
+class WifiIcon : public AnimatedScreenElement<WiFiStatus>{
 public:
-    using ScreenElement<WiFiStatus>::ScreenElement;
+    using AnimatedScreenElement<WiFiStatus>::AnimatedScreenElement;
     void drawImpl() override;
+    void tickImpl() override;
 };

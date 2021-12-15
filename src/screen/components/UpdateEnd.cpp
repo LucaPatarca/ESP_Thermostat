@@ -5,9 +5,9 @@ void UpdateEnd::drawImpl()
     if (_status)
     {
         _display->clearDisplay();
-        _setDisplay(2, 0, 18);
-        _display->println("  UPDATE");
-        _display->println(" COMPLETE");
+        _setDisplay(2, _x, _y);
+        _display->println("  Update");
+        _display->println(" Completed");
 
         _status = false;
     }

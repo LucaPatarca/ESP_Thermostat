@@ -7,14 +7,17 @@
 #include <screen/components/Clock.h>
 
 template<typename Status>
-ScreenElement<Status>::ScreenElement(Adafruit_SSD1306 *display)
+ScreenElement<Status>::ScreenElement(Adafruit_SSD1306 *display, int x, int y)
 {
     _display = display;
+    _x = x;
+    _y = y;
     _needUpdate = true;
 }
 
 template<typename Status>
 void ScreenElement<Status>::_setDisplay(int size, int x, int y){
+    _display->setFont();
     _display->setTextSize(size);
     _display->setTextColor(WHITE, BLACK);
     _display->setCursor(x, y);

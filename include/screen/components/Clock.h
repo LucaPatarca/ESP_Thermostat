@@ -1,9 +1,13 @@
 #pragma once
 
-#include <screen/ScreenElement.h>
+#include <screen/AnimatedScreenElement.h>
 #include <ntime.h>
 
-class Clock: public ScreenElement<Time_t>{
-    using ScreenElement<Time_t>::ScreenElement;
+#define DOTS_VISIBLE 0
+#define DOTS_NOT_VISIBLE 1
+
+class Clock: public AnimatedScreenElement<Time_t>{
+    using AnimatedScreenElement<Time_t>::AnimatedScreenElement;
     void drawImpl() override;
+    void tickImpl() override;
 };

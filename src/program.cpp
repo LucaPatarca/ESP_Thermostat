@@ -30,7 +30,11 @@ void ProgramController::putTemperature(int day, int time, float temp)
     {
         value = static_cast<unsigned char>((temp - 10) * 10);
     }
+
+#ifdef PROGRAM_DEBUG
     Serial.printf("putting %d to %d - %d\n", value, day, time);
+#endif
+
     _program.days[day].temps[time] = value;
 }
 

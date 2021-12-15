@@ -4,7 +4,7 @@
 #include <NTPClient.h>
 
 #define UTC_OFFSET 3600
-#define UPDATE_INTERVAL 1000 //update every second
+#define UPDATE_INTERVAL 1800000  //update every 30 minutes
 
 // #define NTIME_DEBUG
 
@@ -22,11 +22,9 @@ class TimeController{
         WiFiUDP m_udp;
         NTPClient *m_client;
         unsigned long _lastUpdate;
-        void checkUpdate();
 
     public:
         TimeController();
-        void begin();
         Time_t getTime();
         String getFormattedTime();
 };

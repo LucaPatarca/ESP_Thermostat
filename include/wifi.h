@@ -10,11 +10,12 @@
 #include <WiFi.h>
 #endif
 
-#define WIFI_DEBUG
+// #define WIFI_DEBUG
 
 class WifiController : public EventEmitter<WiFiListener>
 {
 private:
+    bool _firstConnection;
     WiFiEventHandler wifiConnectHandler;
     WiFiEventHandler wifiDisconnectHandler;
 

@@ -10,12 +10,11 @@
 
 HomeScreen::HomeScreen(Adafruit_SSD1306 *display) : Screen(display)
 {
-    _targetTemp = new TargetTemp(_display);
-    _currentTemp = new CurrentTemp(_display);
-    _currentHumidity = new CurrentHumidity(_display);
-    _thermoMode = new ThermoMode(_display);
-    _boilerState = new BoilerState(_display);
-    _tempTrend = new TempTrend(_display);
+    _targetTemp = new TargetTemp(_display, 0, 24);
+    _currentTemp = new CurrentTemp(_display, 0, 0);
+    _currentHumidity = new CurrentHumidity(_display, 0, 40);
+    _boilerState = new BoilerState(_display, 98, 38);
+    _tempTrend = new TempTrend(_display, 104, 0);
 }
 
 void HomeScreen::onBoilerState(bool state){
@@ -39,7 +38,7 @@ void HomeScreen::onTargetTemperature(float temp)
 
 void HomeScreen::onThermostatMode(Mode mode)
 {
-    _thermoMode->setStatus(mode);
+    //nop
 }
 
 void HomeScreen::onSetSetting(String, String)
@@ -59,7 +58,6 @@ void HomeScreen::draw()
     _targetTemp->draw();
     _currentTemp->draw();
     _currentHumidity->draw();
-    _thermoMode->draw();
     _boilerState->draw();
     _tempTrend->draw();
 }
@@ -68,7 +66,6 @@ void HomeScreen::refresh(){
     _targetTemp->refresh();
     _currentTemp->refresh();
     _currentHumidity->refresh();
-    _thermoMode->refresh();
     _boilerState->refresh();
     _tempTrend->refresh();
 }

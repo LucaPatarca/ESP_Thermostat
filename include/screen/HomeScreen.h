@@ -17,7 +17,6 @@ private:
     ScreenElement<float> *_targetTemp;
     ScreenElement<float> *_currentTemp;
     ScreenElement<float> *_currentHumidity;
-    ScreenElement<Mode> *_thermoMode;
     ScreenElement<bool> *_boilerState;
     ScreenElement<TemperatureTrend> *_tempTrend;
 public:

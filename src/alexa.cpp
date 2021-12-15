@@ -24,10 +24,13 @@ void AlexaController::connect()
     local.onSetSetting([this](const String &deviceId, const String &settingId, String &settingValue)
                        { return this->onSetSetting(deviceId, settingId, settingValue); });
 
+#ifdef ALEXA_DEBUG
     SinricPro.onConnected([]()
                           { Serial.printf("Connected to SinricPro\r\n"); });
     SinricPro.onDisconnected([]()
                              { Serial.printf("Disconnected from SinricPro\r\n"); });
+#endif
+
     SinricPro.restoreDeviceStates(true);
     SinricPro.begin(APP_KEY, APP_SECRET);
 
@@ -39,19 +42,25 @@ void AlexaController::connect()
 
 bool AlexaController::onPowerState(const String &deviceId, bool &state)
 {
+#ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s turned %s\r\n", deviceId.c_str(), state ? "on" : "off");
+#endif
+
     for (StateListener *listener : _listeners)
     {
         listener->onPowerState(state);
         listener->onThermostatMode(state ? Mode::ON : Mode::OFF);
     }
+    onThermostatMode(state ? Mode::ON : Mode::OFF);
     return true;
 }
 
 bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &temperatureDelta)
 {
     _targetTemperature += temperatureDelta; // calculate absolut temperature
+#ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s changed temperature about %f to %f", deviceId.c_str(), temperatureDelta, _targetTemperature);
+#endif
     temperatureDelta = _targetTemperature; // return absolut temperature
     for (StateListener *listener : _listeners)
     {
@@ -62,7 +71,9 @@ bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &t
 
 bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemperature)
 {
+#ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s set temperature to %f\r\n", deviceId.c_str(), newTemperature);
+#endif
     _targetTemperature = newTemperature;
     for (StateListener *listener : _listeners)
     {
@@ -73,7 +84,9 @@ bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemp
 
 bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
 {
+#ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s set mode to %s\r\n", deviceId.c_str(), mode.c_str());
+#endif
     if (mode == "AUTO")
         for (StateListener *listener : _listeners)
             listener->onThermostatMode(Mode::PROGRAM);
@@ -100,7 +113,9 @@ bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
 
 bool AlexaController::onSetSetting(const String &deviceId, const String &settingId, String &settingValue)
 {
+#ifdef ALEXA_DEBUG
     Serial.printf("ricevuta impostazione '%s' con valore '%s'\n", settingId.c_str(), settingValue.c_str());
+#endif
     for (StateListener *listener : _listeners)
     {
         listener->onSetSetting(settingId.c_str(), settingValue.c_str());
