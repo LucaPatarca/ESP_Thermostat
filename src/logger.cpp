@@ -1,3 +1,5 @@
+#ifdef ENABLE_LOG
+
 #include <logger.h>
 
 void Logger::_sendLog()
@@ -48,3 +50,5 @@ void Logger::onThermostatMode(Mode mode){
 void Logger::onSetSetting(String key, String value){
     //nop
 }
+
+#endif

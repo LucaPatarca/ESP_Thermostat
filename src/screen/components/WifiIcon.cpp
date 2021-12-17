@@ -30,7 +30,7 @@ const unsigned char bar1[] PROGMEM = {
 
 void WifiIcon::drawImpl()
 {
-    _display->fillRect(90, 36, 24, 24, BLACK);
+    _display->fillRect(_x, _y, 24, 24, BLACK);
 
     switch (_status)
     {
@@ -38,10 +38,10 @@ void WifiIcon::drawImpl()
         switch(_animStatus)
         {
         case BAR1:
-            _display->drawBitmap(90, 36, bar1, 24, 24, WHITE);
+            _display->drawBitmap(_x, _y, bar1, 24, 24, WHITE);
             break;
         case BAR2:
-            _display->drawBitmap(90, 36, bar2, 24, 24, WHITE);
+            _display->drawBitmap(_x, _y, bar2, 24, 24, WHITE);
             break;
         
         default:
@@ -49,10 +49,10 @@ void WifiIcon::drawImpl()
         }
         break;
     case WiFiStatus::CONNECTED:
-        _display->drawBitmap(90, 36, connected, 24, 24, WHITE);
+        _display->drawBitmap(_x, _y, connected, 24, 24, WHITE);
         break;
     case WiFiStatus::DISCONNECTED:
-        _display->drawBitmap(90, 36, disconnected, 24, 24, WHITE);
+        _display->drawBitmap(_x, _y, disconnected, 24, 24, WHITE);
 
     default:
         break;

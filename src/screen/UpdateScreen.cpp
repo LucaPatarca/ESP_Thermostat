@@ -4,7 +4,7 @@
 #include <screen/components/UpdateEnd.h>
 
 UpdateScreen::UpdateScreen(Adafruit_SSD1306 *display):Screen(display){
-    _updateProgress = new UpdateProgress(_display, 14, 40);
+    _updateProgress = new UpdateProgress(_display, 14, 42);
     _updateStart = new UpdateStart(_display, 0, 18);
     _updateEnd = new UpdateEnd(_display, 0, 18);
     _updateStart->setStatus(false);

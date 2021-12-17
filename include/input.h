@@ -1,3 +1,5 @@
+#ifndef NO_PHISICAL_INPUT
+
 #include <EventEmitter.h>
 #include <StateListener.h>
 
@@ -18,3 +20,4 @@ public:
 
     void handle();
 };
+#endif

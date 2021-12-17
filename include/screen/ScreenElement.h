@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Adafruit_SSD1306.h>
+#include <Fonts/FreeSans18pt7b.h>
+#include <Fonts/FreeSans12pt7b.h>
 
 template<typename Status>
 class ScreenElement{

@@ -1,3 +1,5 @@
+#ifndef NO_PHISICAL_INPUT
+
 #include <input.h>
 
 InputController::InputController()
@@ -28,3 +30,5 @@ void InputController::handle()
         }
     }
 }
+
+#endif

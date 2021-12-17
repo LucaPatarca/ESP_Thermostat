@@ -7,7 +7,7 @@ TimeScreen::TimeScreen(Adafruit_SSD1306 *display) : Screen(display)
     _clock = new Clock(_display, 800, 0, 0);
     _clock->setStatus(Time->getTime());
 
-    _wifiIcon = new WifiIcon(_display, 800, 90, 36);
+    _wifiIcon = new WifiIcon(_display, 800, 104, 36);
     _thermoMode = new ThermoMode(_display, 104, 0);
 }
 

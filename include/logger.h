@@ -1,3 +1,5 @@
+#ifdef ENABLE_LOG
+
 #pragma once
 
 #include <StateListener.h>
@@ -26,3 +28,4 @@ public:
     void onTargetTemperature(float) override;
     void onSetSetting(String, String) override;
 };
+#endif

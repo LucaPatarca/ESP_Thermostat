@@ -1,6 +1,6 @@
 /*
  * Example for how to use Lock device as garage door opener
- * 
+ *
  * If you encounter any issues:
  * - check the readme.md at https://github.com/sinricpro/esp8266-esp32-sdk/blob/master/README.md
  * - ensure all dependent libraries are installed
@@ -13,6 +13,7 @@
 
 // Uncomment the following line to enable serial debug output
 // #define ENABLE_DEBUG
+#define USE_PHISICAL_INPUT
 
 #include <Arduino.h>
 #include <wifi.h>
@@ -25,7 +26,6 @@
 #include <input.h>
 
 #define BAUD_RATE 9600
-// #define ENABLE_LOG
 
 #ifdef ENABLE_LOG
 #include <logger.h>
@@ -39,10 +39,12 @@ TemperatureController *temperature;
 WifiController *wifi;
 ProgramController *program;
 TimeController *Time;
+#ifndef NO_PHISICAL_INPUT
 InputController *input;
+#endif
 
 #ifdef ENABLE_LOG
-  Logger *logger;
+Logger *logger;
 #endif
 
 void setup()
@@ -58,7 +60,10 @@ void setup()
   alexa = new AlexaController();
   ota = new OTAController();
   program = new ProgramController();
+
+#ifndef NO_PHISICAL_INPUT
   input = new InputController();
+#endif
 
   wifi->addListener(hwio);
   wifi->addListener(alexa);
@@ -74,7 +79,9 @@ void setup()
   alexa->addListener(hwio);
   alexa->addListener(thermostat);
   alexa->addListener(program);
+#ifndef NO_PHISICAL_INPUT
   alexa->addListener(input);
+#endif
 
   ota->addListener(alexa);
   ota->addListener(hwio);
@@ -82,12 +89,14 @@ void setup()
   program->addListener(hwio);
   program->addListener(thermostat);
   program->addListener(alexa);
+#ifndef NO_PHISICAL_INPUT
   program->addListener(input);
 
   input->addListener(alexa);
   input->addListener(hwio);
   input->addListener(thermostat);
   input->addListener(program);
+#endif
 
 #ifdef ENABLE_LOG
   logger = new Logger();
@@ -106,6 +115,8 @@ void loop()
   temperature->handle();
   program->handle();
   hwio->handle();
+#ifndef NO_PHISICAL_INPUT
   input->handle();
+#endif
   delay(100);
 }

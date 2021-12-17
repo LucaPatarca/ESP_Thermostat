@@ -10,9 +10,9 @@
 
 HomeScreen::HomeScreen(Adafruit_SSD1306 *display) : Screen(display)
 {
-    _targetTemp = new TargetTemp(_display, 0, 24);
+    _targetTemp = new TargetTemp(_display, 0, 25);
     _currentTemp = new CurrentTemp(_display, 0, 0);
-    _currentHumidity = new CurrentHumidity(_display, 0, 40);
+    _currentHumidity = new CurrentHumidity(_display, 0, 44);
     _boilerState = new BoilerState(_display, 98, 38);
     _tempTrend = new TempTrend(_display, 104, 0);
 }
