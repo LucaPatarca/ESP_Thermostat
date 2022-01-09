@@ -3,13 +3,18 @@
 #include <EventEmitter.h>
 #include <StateListener.h>
 
-#define PROGRAM_PIN D8
+#define EVENT_INTERVAL 500      //in milliseconds
+#define TEMP_CHANGE 0.1         //in degrees
+#define MODE_PIN D6
+#define TEMP_UP D8
+#define TEMP_DOWN D7
 
 class InputController: public EventEmitter<StateListener>, public StateListener
 {
 private:
     float _lastTemp;
     Mode _lastMode;
+    unsigned long _lastEventTime;
 public:
     InputController();
 

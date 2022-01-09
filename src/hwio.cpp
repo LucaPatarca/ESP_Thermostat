@@ -25,6 +25,7 @@ void HWIOController::_setActiveScreen(Screen *screen)
         _activeScreen = screen;
         _activeScreen->refresh();
     }
+    _lastChange = millis();
 }
 
 void HWIOController::onBoilerState(bool state)
@@ -49,6 +50,7 @@ void HWIOController::onTargetTemperature(float temp)
     Serial.printf("HWIOController::onTargetTemperature(%.1f)\n", temp);
 #endif
     _homeScreen->onTargetTemperature(temp);
+    _setActiveScreen(_homeScreen);
 }
 
 void HWIOController::onCurrentTemperature(Temperature_t temp)
@@ -92,6 +94,7 @@ void HWIOController::onUpdateEvent(UpdateEvent_t event)
 void HWIOController::onThermostatMode(Mode mode)
 {
     _timeScreen->onThermostatMode(mode);
+    _setActiveScreen(_timeScreen);
 }
 
 void HWIOController::onSetSetting(String key, String value)
@@ -110,8 +113,6 @@ void HWIOController::handle()
             _setActiveScreen(_timeScreen);
         else
             _setActiveScreen(_homeScreen);
-
-        _lastChange = millis();
     }
     _activeScreen->draw();
 

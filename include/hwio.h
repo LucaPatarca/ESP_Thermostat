@@ -12,7 +12,7 @@
 #include <screen/TimeScreen.h>
 
 // #define HWIO_DEBUG 
-#define SCREEN_INTERVAL 8000
+#define SCREEN_INTERVAL 10000    //in milliseconds
 
 class HWIOController : public BoilerListener, public StateListener, public TemperatureListener, public UpdateListener, public WiFiListener
 {

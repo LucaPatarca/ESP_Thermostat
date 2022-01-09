@@ -117,6 +117,7 @@ void ProgramController::onTargetTemperature(float temp)
             listener->onThermostatMode(Mode::ON);
             listener->onPowerState(true);
         }
+        _mode = Mode::ON;
     }
 }
 
