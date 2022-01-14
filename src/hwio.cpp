@@ -3,118 +3,110 @@
 
 HWIOController::HWIOController()
 {
-    _display = new Adafruit_SSD1306(128, 64, &Wire, -1);
+    m_display = new Adafruit_SSD1306(128, 64, &Wire, -1);
 
-    if (!_display->begin(SSD1306_SWITCHCAPVCC, 0x3C))
+    if (!m_display->begin(SSD1306_SWITCHCAPVCC, 0x3C))
     {
         Serial.println(F("SSD1306 allocation failed"));
     }
-    _homeScreen = new HomeScreen(_display);
-    _updateScreen = new UpdateScreen(_display);
-    _timeScreen = new TimeScreen(_display);
-    _activeScreen = _homeScreen;
+    m_homeScreen = new HomeScreen(m_display);
+    m_updateScreen = new UpdateScreen(m_display);
+    m_timeScreen = new TimeScreen(m_display);
+    m_activeScreen = m_homeScreen;
     delay(100);
-    _display->dim(true);
+    m_display->dim(true);
 }
 
 void HWIOController::_setActiveScreen(Screen *screen)
 {
-    if (_activeScreen != screen)
+    if (m_activeScreen != screen)
     {
-        _display->clearDisplay();
-        _activeScreen = screen;
-        _activeScreen->refresh();
+        m_display->clearDisplay();
+        m_activeScreen = screen;
+        m_activeScreen->refresh();
     }
-    _lastChange = millis();
+    m_lastChange = millis();
 }
 
-void HWIOController::onBoilerState(bool state)
+void HWIOController::boilerStateChanged()
 {
 #ifdef HWIO_DEBUG
     Serial.printf("HWIOController::onBoilerState(%s)\n", state ? "true" : "false");
 #endif
-    _homeScreen->onBoilerState(state);
+    m_homeScreen->boilerStateChanged();
 }
 
-void HWIOController::onPowerState(bool state)
+void HWIOController::powerStateChanged()
 {
 #ifdef HWIO_DEBUG
     Serial.printf("HWIOController::onPowerState(%s)\n", state ? "true" : "false");
 #endif
-    _homeScreen->onPowerState(state);
+    m_homeScreen->powerStateChanged();
 }
 
-void HWIOController::onTargetTemperature(float temp)
+void HWIOController::targetTemperatureChanged()
 {
 #ifdef HWIO_DEBUG
     Serial.printf("HWIOController::onTargetTemperature(%.1f)\n", temp);
 #endif
-    _homeScreen->onTargetTemperature(temp);
-    _setActiveScreen(_homeScreen);
+    m_homeScreen->targetTemperatureChanged();
+    //TODO check if it was manual
+    _setActiveScreen(m_homeScreen);
 }
 
-void HWIOController::onCurrentTemperature(Temperature_t temp)
+void HWIOController::currentTemperatureChanged()
 {
 #ifdef HWIO_DEBUG
     Serial.printf("HWIOController::onCurrentTemperature({%.1f, %.1f})\n", temp.temp, temp.humidity);
 #endif
-    _homeScreen->onCurrentTemperature(temp);
+    m_homeScreen->currentTemperatureChanged();
 }
 
 void HWIOController::init()
 {
-    _display->clearDisplay();
+    m_display->clearDisplay();
+    m_display->display();
 }
 
-void HWIOController::onWiFiStatus(WiFiStatus status)
+void HWIOController::wifiStatusChanged()
 {
-    _timeScreen->onWiFiStatus(status);
+    m_timeScreen->wifiStatusChanged();
 }
 
-void HWIOController::onUpdateEvent(UpdateEvent_t event)
+void HWIOController::onUpdateEvent(UpdateEvent_t& event)
 {
     if (event.type == UpdateEventType::START)
     {
 #ifdef HWIO_DEBUG
-        Serial.printf("HWIOController::setActiveScreen(_updateScreen)\n");
+        Serial.printf("HWIOController::setActiveScreen(m_updateScreen)\n");
 #endif
-        _setActiveScreen(_updateScreen);
+        _setActiveScreen(m_updateScreen);
     }
-    _updateScreen->onUpdateEvent(event);
+    m_updateScreen->onUpdateEvent(event);
 
-    /*
-     * needs to be called inside this method becouse during update
-     * every handle() method is blocked by the update operation
-     */
-    _activeScreen->draw();
-
-    _display->display();
+    m_display->display();
 }
 
-void HWIOController::onThermostatMode(Mode mode)
+void HWIOController::thermostatModeChanged()
 {
-    _timeScreen->onThermostatMode(mode);
-    _setActiveScreen(_timeScreen);
-}
-
-void HWIOController::onSetSetting(String key, String value)
-{
-    // nop
+    m_timeScreen->thermostatModeChanged();
+    //TODO check if it was manual
+    _setActiveScreen(m_timeScreen);
 }
 
 void HWIOController::handle()
 {
-    if (millis() > _lastChange + SCREEN_INTERVAL)
+    if (millis() > m_lastChange + SCREEN_INTERVAL)
     {
 #ifdef HWIO_DEBUG
         Serial.printf("HWIOController::changeScreen()\n");
 #endif
-        if (_activeScreen == _homeScreen)
-            _setActiveScreen(_timeScreen);
+        if (m_activeScreen == m_homeScreen)
+            _setActiveScreen(m_timeScreen);
         else
-            _setActiveScreen(_homeScreen);
+            _setActiveScreen(m_homeScreen);
     }
-    _activeScreen->draw();
+    m_activeScreen->draw();
 
-    _display->display();
+    m_display->display();
 }

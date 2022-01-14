@@ -2,11 +2,8 @@
 
 #include <SinricPro.h>
 #include <SinricProThermostat.h>
-#include <EventEmitter.h>
-#include <StateListener.h>
-#include <TemperatureListener.h>
-#include <UpdateListener.h>
-#include <WiFiListener.h>
+#include <state.h>
+#include <listeners.h>
 
 // #define ALEXA_DEBUG
 
@@ -19,14 +16,34 @@
 #define TEMP_UPDATE_THRESHOLD 0.2f
 #define HUMIDITY_UPDATE_THRESHOLD 5
 
-class AlexaController : public EventEmitter<StateListener>, public TemperatureListener, public UpdateListener, public StateListener, public WiFiListener
+class AlexaController
 {
+public:
+    AlexaController(AlexaController&) = delete;
+
+    static AlexaController& Instance(){
+        static AlexaController alexa;
+        return alexa;
+    }
+
+    void targetTemperatureChanged(Cause);
+    void powerStateChanged(Cause);
+    void currentTemperatureChanged();
+    void thermostatModeChanged(Cause);
+    void wifiStatusChanged();
+
+    void onUpdateEvent(UpdateEvent_t&);
+
+    void addSettingListener(SettingsListener*);
+
+    void connect();
+    void handle();
 private:
     SinricProThermostat *m_device;
-    float _targetTemperature;
-    float _lastSentTemp;
-    float _lastSentHumidity;
-    bool _wifiConnected;
+    float m_lastSentTemp;
+    float m_lastSentHumidity;
+    State& m_state;
+    SettingsListener *m_listener;
 
     bool onTargetTemperature(const String &, float &);
     bool onAdjustTargetTemperature(const String &, float &);
@@ -34,17 +51,5 @@ private:
     bool onPowerState(const String &, bool &);
     bool onSetSetting(const String &, const String &, String &);
 
-public:
     AlexaController();
-
-    void onTargetTemperature(float) override;
-    void onPowerState(bool) override;
-    void onUpdateEvent(UpdateEvent) override;
-    void onCurrentTemperature(Temperature_t) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(String, String) override;
-    void onWiFiStatus(WiFiStatus status) override;
-
-    void connect();
-    void handle();
 };

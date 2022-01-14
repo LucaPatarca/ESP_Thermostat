@@ -1,13 +1,5 @@
 #include <screen/HomeScreen.h>
 
-#include <screen/components/WifiIcon.h>
-#include <screen/components/TargetTemp.h>
-#include <screen/components/CurrentTemp.h>
-#include <screen/components/CurrentHumidity.h>
-#include <screen/components/ThermoMode.h>
-#include <screen/components/BoilerState.h>
-#include <screen/components/TempTrend.h>
-
 HomeScreen::HomeScreen(Adafruit_SSD1306 *display) : Screen(display)
 {
     _targetTemp = new TargetTemp(_display, 0, 25);
@@ -17,40 +9,28 @@ HomeScreen::HomeScreen(Adafruit_SSD1306 *display) : Screen(display)
     _tempTrend = new TempTrend(_display, 104, 0);
 }
 
-void HomeScreen::onBoilerState(bool state){
-    _boilerState->setStatus(state);
+void HomeScreen::boilerStateChanged(){
+    _boilerState->refresh();
 }
 
-void HomeScreen::onPowerState(bool state)
+void HomeScreen::powerStateChanged()
 {
-    _targetTemp->setStatus(state?_lastTargetTemp:0);
-    _lastPowerState = state;
+    _targetTemp->refresh();
 }
 
-void HomeScreen::onTargetTemperature(float temp)
+void HomeScreen::targetTemperatureChanged()
 {
-    if (_lastPowerState)
+    if (State::Instance().getPowerState())
     {
-        _targetTemp->setStatus(temp);
+        _targetTemp->refresh();
     }
-    _lastTargetTemp = temp;
 }
 
-void HomeScreen::onThermostatMode(Mode mode)
+void HomeScreen::currentTemperatureChanged()
 {
-    //nop
-}
-
-void HomeScreen::onSetSetting(String, String)
-{
-    //nop
-}
-
-void HomeScreen::onCurrentTemperature(Temperature_t temp)
-{
-    _currentTemp->setStatus(temp.temp);
-    _currentHumidity->setStatus(temp.humidity);
-    _tempTrend->setStatus(temp.trend);
+    _currentTemp->refresh();
+    _currentHumidity->refresh();
+    _tempTrend->refresh();
 }
 
 void HomeScreen::draw()

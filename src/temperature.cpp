@@ -78,10 +78,7 @@ void TemperatureController::handle()
         Serial.printf("Temp: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, s[_lastTrend].c_str(), coefficient, humidity);
 #endif
 
-        for (TemperatureListener *listener : _listeners)
-        {
-            listener->onCurrentTemperature({_smoothTemp, humidity, _lastTrend, coefficient});
-        }
+        State::Instance().setCurrentTemperature(Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient});
 
         _updateTime = millis() + TEMP_EVENT_INTERVAL;
     }

@@ -1,30 +1,23 @@
-#include <BoilerController.h>
+#include <boiler.h>
 
-void BoilerController::onCurrentTemperature(Temperature_t temp){
-    _temperature = temp;
-    compute();
-}
-
-void BoilerController::onPowerState(bool state){
-    _powerState = state;
-    compute();
-}
-
-void BoilerController::onTargetTemperature(float temp){
-    _targetTemperature = temp;
-    compute();
-}
-
-
-void BoilerController::setBoilerState(bool state)
+BoilerController::BoilerController()
+    : m_state(State::Instance())
 {
-    if (state != _boilerState)
-    {
-        _boilerState = state;
-        for(BoilerListener *listener: _listeners){
-            listener->onBoilerState(_boilerState);
-        }
-    }
+}
+
+void BoilerController::currentTemperatureChanged()
+{
+    compute();
+}
+
+void BoilerController::powerStateChanged()
+{
+    compute();
+}
+
+void BoilerController::targetTemperatureChanged()
+{
+    compute();
 }
 
 void BoilerController::compute()
@@ -36,14 +29,14 @@ void BoilerController::compute()
     case TCase::BELOW_LOW_RANGE:
     case TCase::BELOW_RANGE_HIGH_NOT_RISING:
     case TCase::BELOW_TARGET_DROPPING:
-        setBoilerState(true);
+        m_state.setBoilerState(true);
         break;
 
     case TCase::OFF_ABOVE_SAFE_RANGE:
     case TCase::BELOW_RANGE_HIGH_RISING:
     case TCase::BELOW_TARGET_NOT_DROPPING:
     case TCase::ABOVE_TARGET:
-        setBoilerState(false);
+        m_state.setBoilerState(false);
         break;
 
     default:
@@ -53,13 +46,13 @@ void BoilerController::compute()
 
 TCase BoilerController::getTempCase()
 {
-    if (!_powerState)
+    if (!m_state.getPowerState())
     {
-        if (_temperature.temp < SAFE_TEMP)
+        if (m_state.getCurrentTemperature().temp < SAFE_TEMP)
         {
             return TCase::OFF_BELOW_SAFE_RANGE;
         }
-        else if (_temperature.temp > SAFE_TEMP + TEMP_RANGE_LOW)
+        else if (m_state.getCurrentTemperature().temp > SAFE_TEMP + TEMP_RANGE_LOW)
         {
             return TCase::OFF_ABOVE_SAFE_RANGE;
         }
@@ -68,13 +61,13 @@ TCase BoilerController::getTempCase()
             return TCase::OFF_IN_SAFE_RANGE;
         }
     }
-    else if (_temperature.temp < _targetTemperature - TEMP_RANGE_LOW)
+    else if (m_state.getCurrentTemperature().temp < m_state.getTargetTemperature() - TEMP_RANGE_LOW)
     {
         return TCase::BELOW_LOW_RANGE;
     }
-    else if (_temperature.temp < _targetTemperature - TEMP_RANGE_HIGH)
+    else if (m_state.getCurrentTemperature().temp < m_state.getTargetTemperature() - TEMP_RANGE_HIGH)
     {
-        if (_temperature.trend == TemperatureTrend::RISE)
+        if (m_state.getCurrentTemperature().trend == TemperatureTrend::RISE)
         {
             return TCase::BELOW_RANGE_HIGH_RISING;
         }
@@ -83,9 +76,9 @@ TCase BoilerController::getTempCase()
             return TCase::BELOW_RANGE_HIGH_NOT_RISING;
         }
     }
-    else if (_temperature.temp < _targetTemperature)
+    else if (m_state.getCurrentTemperature().temp < m_state.getTargetTemperature())
     {
-        if (_temperature.trend == TemperatureTrend::DROP)
+        if (m_state.getCurrentTemperature().trend == TemperatureTrend::DROP)
         {
             return TCase::BELOW_TARGET_DROPPING;
         }
@@ -98,12 +91,4 @@ TCase BoilerController::getTempCase()
     {
         return TCase::ABOVE_TARGET;
     }
-}
-
-void BoilerController::onThermostatMode(Mode mode){
-    //nop
-}
-
-void BoilerController::onSetSetting(String key, String value){
-    //nop
 }

@@ -1,22 +1,16 @@
-#include <screen/Screen.h>
-#include <screen/components/Clock.h>
-#include <WiFiListener.h>
-#include <StateListener.h>
+#include <screen/components.h>
 
-class TimeScreen: public Screen, public WiFiListener, public StateListener
+class TimeScreen: public Screen
 {
 private:
-    ScreenElement<Time_t> *_clock;
-    ScreenElement<WiFiStatus> *_wifiIcon;
-    ScreenElement<Mode> *_thermoMode;
+    ScreenElement *_clock;
+    ScreenElement *_wifiIcon;
+    ScreenElement *_thermoMode;
 public:
     TimeScreen(Adafruit_SSD1306 *display);
 
-    void onWiFiStatus(WiFiStatus) override;
-    void onPowerState(bool) override;
-    void onTargetTemperature(float) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(String, String) override;
+    void wifiStatusChanged();
+    void thermostatModeChanged();
 
     void draw() override;
     void refresh() override;

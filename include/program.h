@@ -1,8 +1,6 @@
 #pragma once
 
-#include <EventEmitter.h>
-#include <StateListener.h>
-#include <ntime.h>
+#include <state.h>
 
 // #define PROGRAM_DEBUG
 
@@ -21,11 +19,11 @@ typedef struct ScheduleChange{
     float temp;
 } ScheduleChange_t;
 
-class ProgramController: public EventEmitter<StateListener>, public StateListener
+class ProgramController
 {
 private:
+    State &m_state;
     WeekProgram _program;
-    Mode _mode;
     int _lastDay;
     int _lastTime;
 
@@ -41,13 +39,18 @@ private:
     void removeScheduleChange(ScheduleChange_t change);
 
     void applyProgram();
-public:
-    ProgramController();
 
-    void onPowerState(bool) override;
-    void onTargetTemperature(float) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(String, String) override;
+    ProgramController();
+public:
+    ProgramController(ProgramController&) = delete;
+
+    static ProgramController& Instance(){
+        static ProgramController controller;
+        return controller;
+    }
+
+    void thermostatModeChanged();
+    void onSetSetting(const String&, String&);
 
     void handle();
 };

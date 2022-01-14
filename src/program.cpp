@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 
 ProgramController::ProgramController()
+    : m_state(State::Instance())
 {
     _lastDay = -1;
     _lastTime = -1;
@@ -61,18 +62,14 @@ void ProgramController::applyProgram()
     Serial.printf("ProgramController::applyProgram()\n");
 #endif
     float target = getTemperature(_lastDay, _lastTime);
-    for (StateListener *listener : _listeners)
-    {
         if (target > 0)
         {
-            listener->onTargetTemperature(target);
-            listener->onPowerState(true);
+            m_state.setTargetTemperature(Cause::SCHEDULE, target);
         }
         else
         {
-            listener->onPowerState(false);
+            m_state.setPowerState(Cause::SCHEDULE, false);
         }
-    }
 
 #ifdef PROGRAM_DEBUG
     Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", _lastDay, _lastTime, _time.getFormattedTime().c_str(), target);
@@ -90,9 +87,9 @@ void ProgramController::applyProgram()
 
 void ProgramController::handle()
 {
-    if (_mode == Mode::PROGRAM)
+    if (m_state.getThermostatMode() == Mode::PROGRAM)
     {
-        Time_t time = Time->getTime();
+        Time_t time = m_state.getTime();
         int programTime = (time.hour*2)+(time.minutes>=30?1:0);
         if (programTime != _lastTime || time.day != _lastDay)
         {
@@ -103,27 +100,9 @@ void ProgramController::handle()
     }
 }
 
-void ProgramController::onPowerState(bool state)
+void ProgramController::thermostatModeChanged()
 {
-    //nop
-}
-
-void ProgramController::onTargetTemperature(float temp)
-{
-    if (_mode == Mode::PROGRAM)
-    {
-        for (StateListener *listener : _listeners)
-        {
-            listener->onThermostatMode(Mode::ON);
-            listener->onPowerState(true);
-        }
-        _mode = Mode::ON;
-    }
-}
-
-void ProgramController::onThermostatMode(Mode mode)
-{
-    _mode = mode;
+    //reset
     _lastDay = -1;
     _lastTime = -1;
 }
@@ -207,7 +186,7 @@ void ProgramController::removeScheduleChange(ScheduleChange_t change)
     applyProgram();
 }
 
-void ProgramController::onSetSetting(String key, String value)
+void ProgramController::onSetSetting(const String &key, String &value)
 {
     if (key == "ScheduleChange")
     {

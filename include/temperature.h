@@ -1,8 +1,7 @@
 #pragma once
 
 #include <DHT.h>
-#include <EventEmitter.h>
-#include <TemperatureListener.h>
+#include <state.h>
 
 // #define TEMPERATURE_DEBUG
 
@@ -15,7 +14,7 @@
 #define DROP_THRESHOLD 3
 #define CHANGE_THRESHOLD 0.1
 
-class TemperatureController : public EventEmitter<TemperatureListener>
+class TemperatureController
 {
 private:
     DHT *_sensor;
@@ -31,8 +30,15 @@ private:
     TemperatureTrend computeTrend();
     float computeCoefficient();
 
-public:
     TemperatureController();
+
+public:
+    TemperatureController(TemperatureController&) = delete;
+
+    static TemperatureController& Instance(){
+        static TemperatureController controller;
+        return controller;
+    }
 
     void handle();
 };

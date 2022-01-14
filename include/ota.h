@@ -3,24 +3,32 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include <EventEmitter.h>
-#include <UpdateListener.h>
-#include <WiFiListener.h>
+#include <state.h>
+#include <listeners.h>
 
 #define OTA_EVENT_INTERVAL 100
 
 // #define OTA_DEBUG
 
-class OTAController : public EventEmitter<UpdateListener>, public WiFiListener
+class OTAController
 {
 private:
+    State &m_state;
     unsigned long _updateTime;
-    bool _isConnected;
-public:
+    void(*onUpdateEvent)(UpdateEvent_t&);
+
     OTAController();
-
-    void onWiFiStatus(WiFiStatus status) override;
-
     void connect();
+public:
+    OTAController(OTAController&) = delete;
+
+    static OTAController& Instance(){
+        static OTAController controller;
+        return controller;
+    }
+
+    void wifiStatusChanged();
+
     void handle();
+    void setOnUpdateEvent(void(*)(UpdateEvent_t&));
 };

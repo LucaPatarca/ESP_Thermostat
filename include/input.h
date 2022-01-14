@@ -1,27 +1,27 @@
 #ifndef NO_PHISICAL_INPUT
 
-#include <EventEmitter.h>
-#include <StateListener.h>
+#include <state.h>
 
-#define EVENT_INTERVAL 500      //in milliseconds
+#define EVENT_INTERVAL 200      //in milliseconds
 #define TEMP_CHANGE 0.1         //in degrees
 #define MODE_PIN D6
-#define TEMP_UP D8
-#define TEMP_DOWN D7
+#define TEMP_UP_PIN D8
+#define TEMP_DOWN_PIN D7
 
-class InputController: public EventEmitter<StateListener>, public StateListener
+class InputController
 {
 private:
-    float _lastTemp;
-    Mode _lastMode;
     unsigned long _lastEventTime;
-public:
-    InputController();
+    State &m_state;
 
-    void onTargetTemperature(float) override;
-    void onPowerState(bool) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(const String, String) override;
+    InputController();
+public:
+    InputController(InputController&) = delete;
+
+    static InputController& Instance(){
+        static InputController controller;
+        return controller;
+    }
 
     void handle();
 };

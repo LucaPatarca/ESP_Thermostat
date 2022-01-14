@@ -1,8 +1,5 @@
 #pragma once
 
-#include <EventEmitter.h>
-#include <WiFiListener.h>
-
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #endif
@@ -10,9 +7,11 @@
 #include <WiFi.h>
 #endif
 
+#include <state.h>
+
 // #define WIFI_DEBUG
 
-class WifiController : public EventEmitter<WiFiListener>
+class WifiController
 {
 private:
     bool _firstConnection;
@@ -23,7 +22,15 @@ private:
 
     void onWiFiConnect(const WiFiEventStationModeGotIP&);
     void onWiFiDisconnect(const WiFiEventStationModeDisconnected&);
-public:
+
     WifiController();
+public:
+    WifiController(WifiController&) = delete;
+
+    static WifiController& Instance(){
+        static WifiController controller;
+        return controller;
+    }
+    
     void connect();
 };

@@ -1,25 +1,15 @@
 #ifndef NO_PHISICAL_INPUT
 
 #include <input.h>
+#include <Arduino.h>
 
 InputController::InputController()
+    : m_state(State::Instance())
 {
     pinMode(MODE_PIN, INPUT);
+    pinMode(TEMP_UP_PIN, INPUT);
+    pinMode(TEMP_DOWN_PIN, INPUT);
 }
-
-void InputController::onTargetTemperature(float temp)
-{
-    _lastTemp = temp;
-}
-
-void InputController::onPowerState(bool) {}
-
-void InputController::onThermostatMode(Mode mode)
-{
-    _lastMode = mode;
-}
-
-void InputController::onSetSetting(const String, String) {}
 
 void InputController::handle()
 {
@@ -27,48 +17,23 @@ void InputController::handle()
     {
         if (digitalRead(MODE_PIN) == HIGH)
         {
-            _lastMode = static_cast<Mode>((_lastMode + 1) % 3);
-            for (StateListener *listener : _listeners)
-            {
-                listener->onThermostatMode(_lastMode);
-            }
-            if (_lastMode == Mode::OFF)
-            {
-                for (StateListener *listener : _listeners)
-                {
-                    listener->onPowerState(false);
-                }
-            } else if (_lastMode == Mode::ON)
-            {
-                for (StateListener *listener : _listeners)
-                {
-                    listener->onPowerState(true);
-                }
-            }
+            m_state.setThermostatMode(Cause::MANUAL, static_cast<Mode>((m_state.getThermostatMode() + 1) % 3));
 #ifdef INPUT_DEBUG
             printf("selected mode: %d\n", _lastMode);
 #endif
             _lastEventTime = millis();
         }
-        else if (digitalRead(TEMP_UP) == HIGH)
+        else if (digitalRead(TEMP_UP_PIN) == HIGH)
         {
-            _lastTemp = _lastTemp + TEMP_CHANGE;
-            for (StateListener *listener : _listeners)
-            {
-                listener->onTargetTemperature(_lastTemp);
-            }
+            m_state.setTargetTemperature(Cause::MANUAL, m_state.getTargetTemperature() + TEMP_CHANGE);
 #ifdef INPUT_DEBUG
             printf("Temp +\n");
 #endif
             _lastEventTime = millis();
         }
-        else if (digitalRead(TEMP_DOWN) == HIGH)
+        else if (digitalRead(TEMP_DOWN_PIN) == HIGH)
         {
-            _lastTemp = _lastTemp - TEMP_CHANGE;
-            for (StateListener *listener : _listeners)
-            {
-                listener->onTargetTemperature(_lastTemp);
-            }
+            m_state.setTargetTemperature(Cause::MANUAL, m_state.getTargetTemperature() - TEMP_CHANGE);
 #ifdef INPUT_DEBUG
             printf("Temp -\n");
 #endif

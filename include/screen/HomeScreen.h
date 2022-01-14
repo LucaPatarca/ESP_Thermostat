@@ -1,33 +1,27 @@
 #pragma once
 
-#include <screen/Screen.h>
-#include <BoilerListener.h>
-#include <StateListener.h>
-#include <TemperatureListener.h>
-#include <WiFiListener.h>
-#include <screen/ScreenElement.h>
+#include <screen/components.h>
+#include <state.h>
 
 //TODO continuare
 
-class HomeScreen: public Screen, public BoilerListener, public StateListener, public TemperatureListener {
+class HomeScreen: public Screen {
 private:
     float _lastTargetTemp;
     float _lastPowerState;
 
-    ScreenElement<float> *_targetTemp;
-    ScreenElement<float> *_currentTemp;
-    ScreenElement<float> *_currentHumidity;
-    ScreenElement<bool> *_boilerState;
-    ScreenElement<TemperatureTrend> *_tempTrend;
+    ScreenElement *_targetTemp;
+    ScreenElement *_currentTemp;
+    ScreenElement *_currentHumidity;
+    ScreenElement *_boilerState;
+    ScreenElement *_tempTrend;
 public:
     HomeScreen(Adafruit_SSD1306 *display);
 
-    void onBoilerState(bool) override;
-    void onPowerState(bool) override;
-    void onTargetTemperature(float) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(String, String) override;
-    void onCurrentTemperature(Temperature_t) override;
+    void boilerStateChanged();
+    void powerStateChanged();
+    void targetTemperatureChanged();
+    void currentTemperatureChanged();
 
     void draw() override;
     void refresh() override;

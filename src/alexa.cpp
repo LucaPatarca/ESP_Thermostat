@@ -2,8 +2,8 @@
 #include <credentials.h>
 
 AlexaController::AlexaController()
+    : m_state(State::Instance())
 {
-    _wifiConnected = false;
 }
 
 void AlexaController::connect()
@@ -46,26 +46,17 @@ bool AlexaController::onPowerState(const String &deviceId, bool &state)
     Serial.printf("Thermostat %s turned %s\r\n", deviceId.c_str(), state ? "on" : "off");
 #endif
 
-    for (StateListener *listener : _listeners)
-    {
-        listener->onPowerState(state);
-        listener->onThermostatMode(state ? Mode::ON : Mode::OFF);
-    }
-    onThermostatMode(state ? Mode::ON : Mode::OFF);
+    m_state.setPowerState(Cause::ALEXA, state);
     return true;
 }
 
 bool AlexaController::onAdjustTargetTemperature(const String &deviceId, float &temperatureDelta)
 {
-    _targetTemperature += temperatureDelta; // calculate absolut temperature
+    m_state.setTargetTemperature(Cause::ALEXA, m_state.getTargetTemperature() + temperatureDelta); // calculate absolut temperature
 #ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s changed temperature about %f to %f", deviceId.c_str(), temperatureDelta, _targetTemperature);
 #endif
-    temperatureDelta = _targetTemperature; // return absolut temperature
-    for (StateListener *listener : _listeners)
-    {
-        listener->onTargetTemperature(_targetTemperature);
-    }
+    temperatureDelta = m_state.getTargetTemperature(); // return absolut temperature
     return true;
 }
 
@@ -74,11 +65,7 @@ bool AlexaController::onTargetTemperature(const String &deviceId, float &newTemp
 #ifdef ALEXA_DEBUG
     Serial.printf("Thermostat %s set temperature to %f\r\n", deviceId.c_str(), newTemperature);
 #endif
-    _targetTemperature = newTemperature;
-    for (StateListener *listener : _listeners)
-    {
-        listener->onTargetTemperature(_targetTemperature);
-    }
+    m_state.setTargetTemperature(Cause::ALEXA, newTemperature);
     return true;
 }
 
@@ -88,24 +75,15 @@ bool AlexaController::onThermostatMode(const String &deviceId, String &mode)
     Serial.printf("Thermostat %s set mode to %s\r\n", deviceId.c_str(), mode.c_str());
 #endif
     if (mode == "AUTO")
-        for (StateListener *listener : _listeners)
-            listener->onThermostatMode(Mode::PROGRAM);
+        m_state.setThermostatMode(Cause::ALEXA, Mode::PROGRAM);
     else if (mode == "HEAT")
     {
-        for (StateListener *listener : _listeners)
-        {
-            listener->onThermostatMode(Mode::ON);
-            listener->onPowerState(true);
-        }
+        m_state.setThermostatMode(Cause::ALEXA, Mode::ON);
         m_device->sendPowerStateEvent(true);
     }
     else
     {
-        for (StateListener *listener : _listeners)
-        {
-            listener->onThermostatMode(Mode::OFF);
-            listener->onPowerState(false);
-        }
+        m_state.setThermostatMode(Cause::ALEXA, Mode::OFF);
         m_device->sendPowerStateEvent(false);
     }
     return true;
@@ -116,39 +94,40 @@ bool AlexaController::onSetSetting(const String &deviceId, const String &setting
 #ifdef ALEXA_DEBUG
     Serial.printf("ricevuta impostazione '%s' con valore '%s'\n", settingId.c_str(), settingValue.c_str());
 #endif
-    for (StateListener *listener : _listeners)
-    {
-        listener->onSetSetting(settingId.c_str(), settingValue.c_str());
-    }
+    if(m_listener)
+        m_listener->onSetSetting(settingId, settingValue);
     return true;
 }
 
 void AlexaController::handle()
 {
-    if (_wifiConnected)
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
         SinricPro.handle();
     }
 }
 
-void AlexaController::onTargetTemperature(float temp)
+void AlexaController::targetTemperatureChanged(Cause cause)
 {
-    _targetTemperature = temp;
-    if (_wifiConnected)
+    if (cause == Cause::ALEXA)
+        return;
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        m_device->sendTargetTemperatureEvent(temp);
+        m_device->sendTargetTemperatureEvent(m_state.getTargetTemperature());
     }
 }
 
-void AlexaController::onPowerState(bool state)
+void AlexaController::powerStateChanged(Cause cause)
 {
-    if (_wifiConnected)
+    if (cause == Cause::ALEXA)
+        return;
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        m_device->sendPowerStateEvent(state);
+        m_device->sendPowerStateEvent(m_state.getPowerState());
     }
 }
 
-void AlexaController::onUpdateEvent(UpdateEvent event)
+void AlexaController::onUpdateEvent(UpdateEvent_t& event)
 {
     if (event.type == UpdateEventType::START)
     {
@@ -156,28 +135,30 @@ void AlexaController::onUpdateEvent(UpdateEvent event)
     }
 }
 
-void AlexaController::onCurrentTemperature(Temperature_t temp)
+void AlexaController::currentTemperatureChanged()
 {
-    if (_wifiConnected)
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        if (temp.temp - _lastSentTemp > TEMP_UPDATE_THRESHOLD || _lastSentTemp - temp.temp > TEMP_UPDATE_THRESHOLD)
+        auto temp = m_state.getCurrentTemperature();
+        if (temp.temp - m_lastSentTemp > TEMP_UPDATE_THRESHOLD ||
+            m_lastSentTemp - temp.temp > TEMP_UPDATE_THRESHOLD ||
+            temp.humidity - m_lastSentHumidity > HUMIDITY_UPDATE_THRESHOLD ||
+            m_lastSentHumidity - temp.humidity > HUMIDITY_UPDATE_THRESHOLD)
         {
-            m_device->sendTemperatureEvent(temp.temp, _lastSentHumidity);
-            _lastSentTemp = temp.temp;
-        }
-        else if (temp.humidity - _lastSentHumidity > HUMIDITY_UPDATE_THRESHOLD || _lastSentHumidity - temp.humidity > HUMIDITY_UPDATE_THRESHOLD)
-        {
-            m_device->sendTemperatureEvent(_lastSentTemp, temp.humidity);
-            _lastSentHumidity = temp.humidity;
+            m_device->sendTemperatureEvent(temp.temp, temp.humidity);
+            m_lastSentTemp = temp.temp;
+            m_lastSentHumidity = temp.humidity;
         }
     }
 }
 
-void AlexaController::onThermostatMode(Mode mode)
+void AlexaController::thermostatModeChanged(Cause cause)
 {
-    if (_wifiConnected)
+    if (cause == Cause::ALEXA)
+        return;
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        switch (mode)
+        switch (m_state.getThermostatMode())
         {
         case Mode::OFF:
             m_device->sendThermostatModeEvent("OFF");
@@ -195,21 +176,19 @@ void AlexaController::onThermostatMode(Mode mode)
     }
 }
 
-void AlexaController::onWiFiStatus(WiFiStatus status)
+void AlexaController::wifiStatusChanged()
 {
-    if (status == WiFiStatus::CONNECTED)
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        _wifiConnected = true;
         connect();
     }
-    else if (status == WiFiStatus::DISCONNECTED)
+    else if (m_state.getWifiStatus() == WiFiStatus::DISCONNECTED)
     {
         SinricPro.stop();
-        _wifiConnected = false;
     }
 }
 
-void AlexaController::onSetSetting(String key, String value)
+void AlexaController::addSettingListener(SettingsListener* listener)
 {
-    // nop
+    m_listener = listener;
 }

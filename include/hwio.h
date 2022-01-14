@@ -2,43 +2,46 @@
 
 #include <Adafruit_SSD1306.h>
 #include <temperature.h>
-#include <BoilerListener.h>
-#include <StateListener.h>
-#include <TemperatureListener.h>
-#include <UpdateListener.h>
-#include <WiFiListener.h>
 #include <screen/HomeScreen.h>
 #include <screen/UpdateScreen.h>
 #include <screen/TimeScreen.h>
+#include <listeners.h>
 
 // #define HWIO_DEBUG 
 #define SCREEN_INTERVAL 10000    //in milliseconds
 
-class HWIOController : public BoilerListener, public StateListener, public TemperatureListener, public UpdateListener, public WiFiListener
+class HWIOController
 {
-private:
-    Adafruit_SSD1306 *_display;
-    unsigned long _lastChange;
-    
-    HomeScreen *_homeScreen;
-    UpdateScreen *_updateScreen;
-    TimeScreen *_timeScreen;
-    
-    Screen *_activeScreen;
-
-    void _setActiveScreen(Screen *screen);
 public:
-    HWIOController();
+    HWIOController(HWIOController&) = delete;
 
-    void onBoilerState(bool) override;
-    void onPowerState(bool) override;
-    void onTargetTemperature(float) override;
-    void onThermostatMode(Mode) override;
-    void onSetSetting(String, String) override;
-    void onCurrentTemperature(Temperature_t) override;
-    void onUpdateEvent(UpdateEvent) override;
-    void onWiFiStatus(WiFiStatus) override;
+    static HWIOController& Instance(){
+        static HWIOController controller;
+        return controller;
+    }
+    
+    void boilerStateChanged();
+    void powerStateChanged();
+    void targetTemperatureChanged();
+    void thermostatModeChanged();
+    void currentTemperatureChanged();
+    void wifiStatusChanged();
+
+    void onUpdateEvent(UpdateEvent_t&);
 
     void handle();
     void init();
+private:
+    Adafruit_SSD1306 *m_display;
+    unsigned long m_lastChange;
+    
+    HomeScreen *m_homeScreen;
+    UpdateScreen *m_updateScreen;
+    TimeScreen *m_timeScreen;
+    
+    Screen *m_activeScreen;
+
+    void _setActiveScreen(Screen *screen);
+
+    HWIOController();
 };

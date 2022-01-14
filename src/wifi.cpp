@@ -1,6 +1,5 @@
 #include <wifi.h>
 #include <credentials.h>
-#include <ntime.h>
 
 WifiController::WifiController()
 {
@@ -12,10 +11,7 @@ WifiController::WifiController()
 
 void WifiController::notifiStatus(WiFiStatus status)
 {
-    for (WiFiListener *listener : _listeners)
-    {
-        listener->onWiFiStatus(status);
-    }
+    State::Instance().setwWifiStatus(status);
 }
 
 void WifiController::onWiFiConnect(const WiFiEventStationModeGotIP &event)

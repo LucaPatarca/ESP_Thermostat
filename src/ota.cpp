@@ -1,29 +1,24 @@
 #include <ota.h>
 
 OTAController::OTAController()
+    : m_state(State::Instance())
 {
     ArduinoOTA.onStart([this]()
                        {
-                           for (UpdateListener *listener : _listeners)
-                           {
-                               listener->onUpdateEvent({UpdateEventType::START, 0, ""});
-                           }
+                           UpdateEvent_t event = UpdateEvent_t{UpdateEventType::START, 0, ""};
+                           onUpdateEvent(event);
                        });
     ArduinoOTA.onEnd([this]()
                      {
-                         for (UpdateListener *listener : _listeners)
-                         {
-                             listener->onUpdateEvent({UpdateEventType::END, 100, ""});
-                         }
+                         UpdateEvent_t event = UpdateEvent_t{UpdateEventType::END, 100, ""};
+                         onUpdateEvent(event);
                      });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
                           {
                               if (millis() > _updateTime)
                               {
-                                  for (UpdateListener *listener : _listeners)
-                                  {
-                                      listener->onUpdateEvent({UpdateEventType::PROGRESS, ((float)progress / ((float)total / 100)), ""});
-                                  }
+                                  UpdateEvent_t event = UpdateEvent_t{UpdateEventType::PROGRESS, ((float)progress / ((float)total / 100)), ""};
+                                  onUpdateEvent(event);
                                   _updateTime = millis() + OTA_EVENT_INTERVAL;
                               }
                           });
@@ -42,41 +37,39 @@ OTAController::OTAController()
                                message = "End Failed";
                            else
                                message = "Unknown";
-                           for (UpdateListener *listener : _listeners)
-                           {
-                               listener->onUpdateEvent({UpdateEventType::ERROR, -1, message});
-                           }
+                           UpdateEvent_t event = UpdateEvent_t{UpdateEventType::ERROR, -1, message};
+                           onUpdateEvent(event);
                        });
-    _isConnected = false;
 }
 
-void OTAController::onWiFiStatus(WiFiStatus status)
+void OTAController::wifiStatusChanged()
 {
-    if(status == WiFiStatus::CONNECTED){
-        connect();
-    }
-    else if(status == WiFiStatus::DISCONNECTED)
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
-        _isConnected = false;
+        connect();
     }
 }
 
 void OTAController::connect()
 {
-    #ifdef OTA_DEBUG
+#ifdef OTA_DEBUG
     Serial.printf("[OTAController] connecting...\n");
-    #endif
+#endif
     ArduinoOTA.begin();
-    _isConnected = true;
-    #ifdef OTA_DEBUG
+#ifdef OTA_DEBUG
     Serial.printf("[OTAController] connected\n");
-    #endif
+#endif
 }
 
 void OTAController::handle()
 {
-    if (_isConnected)
+    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
     {
         ArduinoOTA.handle();
     }
+}
+
+void OTAController::setOnUpdateEvent(void (*func)(UpdateEvent_t &))
+{
+    onUpdateEvent = func;
 }
