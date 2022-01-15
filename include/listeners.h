@@ -1,12 +1,12 @@
 #pragma once
 
-#include <WString.h>
+#include <Arduino.h>
 #include <cstdio>
 
 class SettingsListener
 {
 public:
-    virtual void onSetSetting(const String &, String &);
+    virtual void onSetSetting(const String &, String &) = 0;
 };
 
 enum Cause

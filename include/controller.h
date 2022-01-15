@@ -1,3 +1,4 @@
+#include <listeners.h>
 #include <wifi.h>
 #include <boiler.h>
 #include <hwio.h>
@@ -6,7 +7,6 @@
 #include <temperature.h>
 #include <program.h>
 #include <input.h>
-#include <listeners.h>
 
 class MainController : public StateListener, public SettingsListener, public UpdateListener
 {

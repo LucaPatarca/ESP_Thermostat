@@ -7,14 +7,8 @@
 
 #pragma once
 
-#include "SinricProInterface.h"
-#include "SinricProDeviceInterface.h"
 #include "SinricProWebsocket.h"
 #include "SinricProUDP.h"
-#include "SinricProSignature.h"
-#include "SinricProMessageid.h"
-#include "SinricProQueue.h"
-#include "SinricProStrings.h"
 #include "SinricProThermostat.h"
 
 #include "SinricProNamespace.h"

@@ -1,5 +1,6 @@
 #include "SinricProDevice.h"
 #include "SinricPro.h"
+#include "SinricProDebug.h"
 
 namespace SINRICPRO_NAMESPACE{
 

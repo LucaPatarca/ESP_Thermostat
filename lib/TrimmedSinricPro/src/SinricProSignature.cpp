@@ -5,7 +5,6 @@
  *  This file is part of the Sinric Pro (https://github.com/sinricpro/)
  */
 
-#include <WString.h>
 #include <ArduinoJson.h>
 #include "SinricProSignature.h"
 

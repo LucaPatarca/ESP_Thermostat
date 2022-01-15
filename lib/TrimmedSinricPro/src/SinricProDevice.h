@@ -9,7 +9,6 @@
 
 #include "SinricProRequest.h"
 #include "SinricProDeviceInterface.h"
-#include <map>
 
 #include "SinricProNamespace.h"
 namespace SINRICPRO_NAMESPACE {

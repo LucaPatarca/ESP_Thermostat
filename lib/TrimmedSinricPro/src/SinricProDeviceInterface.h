@@ -13,7 +13,7 @@ class SinricProDeviceInterface {
     virtual String        getDeviceId() = 0;
     virtual String        getProductType() = 0;
     virtual void          begin(SinricProInterface* eventSender) = 0;
-    virtual unsigned long getTimestamp();
+    virtual unsigned long getTimestamp() = 0;
 };
 
 } // SINRICPRO_NAMESPACE

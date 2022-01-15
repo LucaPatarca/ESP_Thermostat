@@ -12,6 +12,7 @@ MainController::MainController()
     m_state(State::Instance())
 {
     m_state.addListener(this);
+    m_alexa.addSettingListener(this);
 }
 
 void MainController::setup()

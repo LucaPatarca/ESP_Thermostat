@@ -2,8 +2,8 @@
 
 #include "../EventLimiter.h"
 #include "../SinricProStrings.h"
-
 #include "../SinricProNamespace.h"
+#include <Arduino.h>
 namespace SINRICPRO_NAMESPACE {
 
 EXTERN_FSTR(TEMPERATURE, currentTemperature);    // "currentTemperature"

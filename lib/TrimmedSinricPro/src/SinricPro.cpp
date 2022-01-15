@@ -1,5 +1,8 @@
 #include "SinricPro.h"
 #include "SinricProThermostat.h"
+#include "SinricProSignature.h"
+#include "SinricProMessageid.h"
+#include "SinricProDebug.h"
 
 namespace SINRICPRO_NAMESPACE{
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <WString.h>
 #include <ArduinoJson.h>
 #include <functional>
 

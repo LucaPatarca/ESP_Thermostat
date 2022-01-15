@@ -2,7 +2,6 @@
 
 #include "SinricProConfig.h"
 #include "SinricProNamespace.h"
-#include <Arduino.h>
 
 namespace SINRICPRO_NAMESPACE {
 

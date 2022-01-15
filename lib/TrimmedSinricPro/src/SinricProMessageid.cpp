@@ -1,4 +1,5 @@
 #include "SinricProMessageid.h"
+#include <Arduino.h>
 
 namespace SINRICPRO_NAMESPACE{
 

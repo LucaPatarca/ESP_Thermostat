@@ -1,4 +1,6 @@
 #include "SinricProWebsocket.h"
+#include "SinricProDebug.h"
+#include "SinricProConfig.h"
 
 namespace SINRICPRO_NAMESPACE{
 
