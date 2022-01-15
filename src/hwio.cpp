@@ -44,14 +44,14 @@ void HWIOController::powerStateChanged()
     m_homeScreen->powerStateChanged();
 }
 
-void HWIOController::targetTemperatureChanged()
+void HWIOController::targetTemperatureChanged(Cause cause)
 {
 #ifdef HWIO_DEBUG
     Serial.printf("HWIOController::onTargetTemperature(%.1f)\n", temp);
 #endif
     m_homeScreen->targetTemperatureChanged();
-    //TODO check if it was manual
-    _setActiveScreen(m_homeScreen);
+    if(cause == Cause::MANUAL)
+        _setActiveScreen(m_homeScreen);
 }
 
 void HWIOController::currentTemperatureChanged()
@@ -86,11 +86,11 @@ void HWIOController::onUpdateEvent(const UpdateEvent_t& event)
     m_display->display();
 }
 
-void HWIOController::thermostatModeChanged()
+void HWIOController::thermostatModeChanged(Cause cause)
 {
     m_timeScreen->thermostatModeChanged();
-    //TODO check if it was manual
-    _setActiveScreen(m_timeScreen);
+    if(cause == Cause::MANUAL)
+        _setActiveScreen(m_timeScreen);
 }
 
 void HWIOController::handle()

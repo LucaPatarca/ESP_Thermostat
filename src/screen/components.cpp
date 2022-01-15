@@ -48,12 +48,12 @@ void CurrentTemp::drawImpl(){
 }
 
 void TargetTemp::drawImpl(){
-    float _status = State::Instance().getTargetTemperature();
+    State& state = State::Instance();
     _display->fillRect(_x, _y, 72, 19, BLACK);
     _setDisplay(1, _x, _y+12);
     _display->setFont(&FreeSans12pt7b);
-    if (_status > 0)
-        _display->printf("%.1f c", _status);
+    if (state.getPowerState())
+        _display->printf("%.1f c", state.getTargetTemperature());
     else
         _display->printf("--.- c");
 }

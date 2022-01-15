@@ -51,7 +51,7 @@ void State::setThermostatMode(Cause cause, Mode mode)
     }
 }
 
-void State::setCurrentTemperature(Temperature_t &temp)
+void State::setCurrentTemperature(Temperature_t &&temp)
 {
     m_currentTemperature = temp;
     m_listener->currentTemperatureChanged();

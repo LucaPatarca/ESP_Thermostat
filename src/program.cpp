@@ -8,7 +8,7 @@ ProgramController::ProgramController()
     m_lastDay = -1;
     m_lastTime = -1;
 #ifdef PROGRAM_DEBUG
-    Serial.printf("[ProgramController] EEPROM.begin(%d)\n", sizeof(WeekProgram));
+    Serial.printf("[ProgramController] EEPROM.begin(%d)\n", sizeof(WeekProgram_t));
 #endif
     EEPROM.begin(sizeof(WeekProgram_t));
     loadProgram();
@@ -72,7 +72,7 @@ void ProgramController::applyProgram()
         }
 
 #ifdef PROGRAM_DEBUG
-    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", m_lastDay, m_lastTime, _time.getFormattedTime().c_str(), target);
+    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", m_lastDay, m_lastTime, m_state.getFormattedTime().c_str(), target);
     for (int d = 0; d < 7; d++)
     {
         Serial.printf("day: %d\n[ ", d);
@@ -137,7 +137,7 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
     {
         Serial.printf("%d, ", d);
     }
-    Serial.printf("], from: %d, to: %d, %.1f C\n", parsed.fromTime, parsed.toTime, parsed.temp);
+    Serial.printf("], from: %d, to: %d, %.1f C\n", change.fromTime, change.toTime, change.temp);
 #endif
 
     return 0;

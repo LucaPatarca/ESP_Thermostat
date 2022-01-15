@@ -75,9 +75,7 @@ void TemperatureController::handle()
         String s[] = {"Drop", "Rise", "Stable"};
         Serial.printf("Temp: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, s[_lastTrend].c_str(), coefficient, humidity);
 #endif
-        //TODO fix using rvalue
-        Temperature_t t = Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient};
-        State::Instance().setCurrentTemperature(t);
+        State::Instance().setCurrentTemperature(Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient});
 
         _updateTime = millis() + TEMP_EVENT_INTERVAL;
     }

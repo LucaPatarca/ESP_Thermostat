@@ -22,8 +22,8 @@ public:
     
     void boilerStateChanged();
     void powerStateChanged();
-    void targetTemperatureChanged();
-    void thermostatModeChanged();
+    void targetTemperatureChanged(Cause);
+    void thermostatModeChanged(Cause);
     void currentTemperatureChanged();
     void wifiStatusChanged();
 

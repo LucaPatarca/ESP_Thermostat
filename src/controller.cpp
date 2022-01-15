@@ -36,7 +36,7 @@ void MainController::targetTemperatureChanged(Cause cause)
 {
     m_alexa.targetTemperatureChanged(cause);
     m_thermostat.targetTemperatureChanged();
-    m_hwio.targetTemperatureChanged();
+    m_hwio.targetTemperatureChanged(cause);
 }
 
 void MainController::powerStateChanged(Cause cause)
@@ -49,7 +49,7 @@ void MainController::powerStateChanged(Cause cause)
 void MainController::thermostatModeChanged(Cause cause)
 {
     m_alexa.thermostatModeChanged(cause);
-    m_hwio.thermostatModeChanged();
+    m_hwio.thermostatModeChanged(cause);
     m_program.thermostatModeChanged();
 }
 
