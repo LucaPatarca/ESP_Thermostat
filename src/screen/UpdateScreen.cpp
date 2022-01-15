@@ -5,7 +5,7 @@ UpdateScreen::UpdateScreen(Adafruit_SSD1306 *display) : Screen(display)
 {
 }
 
-void UpdateScreen::onUpdateEvent(UpdateEvent_t& event)
+void UpdateScreen::onUpdateEvent(const UpdateEvent_t& event)
 {
     switch (event.type)
     {
@@ -16,10 +16,10 @@ void UpdateScreen::onUpdateEvent(UpdateEvent_t& event)
         _display->setCursor(0, 24);
         _display->setFont(&FreeSans12pt7b);
         _display->println("  Updating");
-        _display->drawRect(14, 42, 100, 10, WHITE);
+        _display->drawRect(14, 42, 100, 12, WHITE);
         break;
     case UpdateEventType::PROGRESS:
-        _display->fillRect(14, 18, (int)event.progress, 12, WHITE);
+        _display->fillRect(14, 42, (int)event.progress, 12, WHITE);
         break;
     case UpdateEventType::END:
         _display->clearDisplay();
@@ -30,7 +30,7 @@ void UpdateScreen::onUpdateEvent(UpdateEvent_t& event)
         _display->println("    Update");
         _display->println(" Completed");
         break;
-
+    //TODO handle errors
     default:
         break;
     }

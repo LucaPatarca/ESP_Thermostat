@@ -13,7 +13,7 @@
 class HWIOController
 {
 public:
-    HWIOController(HWIOController&) = delete;
+    HWIOController(const HWIOController&) = delete;
 
     static HWIOController& Instance(){
         static HWIOController controller;
@@ -27,7 +27,7 @@ public:
     void currentTemperatureChanged();
     void wifiStatusChanged();
 
-    void onUpdateEvent(UpdateEvent_t&);
+    void onUpdateEvent(const UpdateEvent_t&);
 
     void handle();
     void init();

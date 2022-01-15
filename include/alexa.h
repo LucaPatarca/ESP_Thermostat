@@ -19,7 +19,7 @@
 class AlexaController
 {
 public:
-    AlexaController(AlexaController&) = delete;
+    AlexaController(const AlexaController&) = delete;
 
     static AlexaController& Instance(){
         static AlexaController alexa;
@@ -32,7 +32,7 @@ public:
     void thermostatModeChanged(Cause);
     void wifiStatusChanged();
 
-    void onUpdateEvent(UpdateEvent_t&);
+    void onUpdateEvent(const UpdateEvent_t&);
 
     void addSettingListener(SettingsListener*);
 

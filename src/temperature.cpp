@@ -2,12 +2,10 @@
 #include "temperature.h"
 
 TemperatureController::TemperatureController()
+    : _sensor(DHT(SENSOR_PIN, DHT22)),
+    _lastTrend(TemperatureTrend::STABLE)
 {
-    _sensor = new DHT(SENSOR_PIN, DHT22);
-    _sensor->begin();
-    _lastTrend = TemperatureTrend::STABLE;
-    _lastTemp = 0;
-    _stableCount = 0;
+    _sensor.begin();
 }
 
 TemperatureTrend TemperatureController::computeTrend()
@@ -66,9 +64,9 @@ void TemperatureController::handle()
 {
     if (millis() > _updateTime)
     {
-        _smoothTemp = smoothe(_sensor->readTemperature(), _smoothTemp);
+        _smoothTemp = smoothe(_sensor.readTemperature(), _smoothTemp);
         if(_lastTemp==0) _lastTemp = _smoothTemp;
-        float humidity = _sensor->readHumidity();
+        float humidity = _sensor.readHumidity();
 
         float coefficient = computeCoefficient();
         _lastTrend = computeTrend();
@@ -77,8 +75,8 @@ void TemperatureController::handle()
         String s[] = {"Drop", "Rise", "Stable"};
         Serial.printf("Temp: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, s[_lastTrend].c_str(), coefficient, humidity);
 #endif
-
-        State::Instance().setCurrentTemperature(Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient});
+        Temperature_t t = Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient};
+        State::Instance().setCurrentTemperature(t);
 
         _updateTime = millis() + TEMP_EVENT_INTERVAL;
     }

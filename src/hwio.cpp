@@ -73,7 +73,7 @@ void HWIOController::wifiStatusChanged()
     m_timeScreen->wifiStatusChanged();
 }
 
-void HWIOController::onUpdateEvent(UpdateEvent_t& event)
+void HWIOController::onUpdateEvent(const UpdateEvent_t& event)
 {
     if (event.type == UpdateEventType::START)
     {
@@ -83,7 +83,6 @@ void HWIOController::onUpdateEvent(UpdateEvent_t& event)
         _setActiveScreen(m_updateScreen);
     }
     m_updateScreen->onUpdateEvent(event);
-
     m_display->display();
 }
 

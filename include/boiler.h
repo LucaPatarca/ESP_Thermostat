@@ -32,7 +32,7 @@ private:
     BoilerController();
 
 public:
-    BoilerController(BoilerController&) = delete;
+    BoilerController(const BoilerController&) = delete;
 
     static BoilerController& Instance(){
         static BoilerController controller;

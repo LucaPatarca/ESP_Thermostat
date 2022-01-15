@@ -16,7 +16,7 @@ private:
 
     InputController();
 public:
-    InputController(InputController&) = delete;
+    InputController(const InputController&) = delete;
 
     static InputController& Instance(){
         static InputController controller;

@@ -69,7 +69,7 @@ void OTAController::handle()
     }
 }
 
-void OTAController::setOnUpdateEvent(void (*func)(UpdateEvent_t &))
+void OTAController::setOnUpdateEvent(std::function<void(const UpdateEvent_t&)> func)
 {
     onUpdateEvent = func;
 }

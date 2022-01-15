@@ -5,6 +5,7 @@
 #include <ArduinoOTA.h>
 #include <state.h>
 #include <listeners.h>
+#include <functional>
 
 #define OTA_EVENT_INTERVAL 100
 
@@ -15,12 +16,12 @@ class OTAController
 private:
     State &m_state;
     unsigned long _updateTime;
-    void(*onUpdateEvent)(UpdateEvent_t&);
+    std::function<void(const UpdateEvent_t&)> onUpdateEvent;
 
     OTAController();
     void connect();
 public:
-    OTAController(OTAController&) = delete;
+    OTAController(const OTAController&) = delete;
 
     static OTAController& Instance(){
         static OTAController controller;
@@ -30,5 +31,5 @@ public:
     void wifiStatusChanged();
 
     void handle();
-    void setOnUpdateEvent(void(*)(UpdateEvent_t&));
+    void setOnUpdateEvent(std::function<void(const UpdateEvent_t&)>);
 };

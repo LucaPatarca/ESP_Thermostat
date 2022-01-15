@@ -11,7 +11,7 @@
 class MainController : public StateListener, public SettingsListener, public UpdateListener
 {
 public:
-    MainController(MainController&) = delete;
+    MainController(const MainController&) = delete;
     
     static MainController& Instance(){
         static MainController controller;
@@ -29,7 +29,7 @@ public:
     void wifiStatusChanged() override;
 
     void onSetSetting(const String&, String&) override;
-    void onUpdateEvent(UpdateEvent_t&) override;
+    void onUpdateEvent(const UpdateEvent_t&) override;
 
 private:
     BoilerController &m_thermostat;

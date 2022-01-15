@@ -17,7 +17,7 @@
 class TemperatureController
 {
 private:
-    DHT *_sensor;
+    DHT _sensor;
     TemperatureTrend _lastTrend;
     float _lastTemp;
     float _smoothTemp;
@@ -33,7 +33,7 @@ private:
     TemperatureController();
 
 public:
-    TemperatureController(TemperatureController&) = delete;
+    TemperatureController(const TemperatureController&) = delete;
 
     static TemperatureController& Instance(){
         static TemperatureController controller;

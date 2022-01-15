@@ -4,15 +4,15 @@
 
 // #define PROGRAM_DEBUG
 
-typedef struct DayProgram{
+typedef struct {
     unsigned char temps[48];
 } DayProgram_t;
 
-typedef struct WeekProgram {
+typedef struct {
     DayProgram_t days[7];
 } WeekProgram_t;
 
-typedef struct ScheduleChange{
+typedef struct {
     int days[7];
     int fromTime;
     int toTime;
@@ -23,26 +23,25 @@ class ProgramController
 {
 private:
     State &m_state;
-    WeekProgram _program;
-    int _lastDay;
-    int _lastTime;
+    WeekProgram_t _program;
+    int m_lastDay;
+    int m_lastTime;
 
     float getTemperature(int, int);
     void putTemperature(int, int, float);
 
-    WeekProgram loadProgram();
+    void loadProgram();
     bool saveProgram();
 
-    ScheduleChange_t createEmptyChange();
-    ScheduleChange_t parseChange(String value);
-    void addScheduleChange(ScheduleChange_t change);
-    void removeScheduleChange(ScheduleChange_t change);
+    int parseChange(ScheduleChange_t&, String &value);
+    void addScheduleChange(const ScheduleChange_t &change);
+    void removeScheduleChange(const ScheduleChange_t &change);
 
     void applyProgram();
 
     ProgramController();
 public:
-    ProgramController(ProgramController&) = delete;
+    ProgramController(const ProgramController&) = delete;
 
     static ProgramController& Instance(){
         static ProgramController controller;

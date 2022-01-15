@@ -10,9 +10,9 @@ State::State()
     m_thermostatMode(Mode::OFF),
     m_currentTemperature(Temperature_t{0,0,TemperatureTrend::STABLE,0}),
     m_wifiStatus(WiFiStatus::DISCONNECTED),
-    m_client(new NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET, UPDATE_INTERVAL))
+    m_client(NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET, UPDATE_INTERVAL))
 {
-    m_client->begin();
+    m_client.begin();
 }
 
 void State::setBoilerState(bool state)
@@ -51,7 +51,7 @@ void State::setThermostatMode(Cause cause, Mode mode)
     }
 }
 
-void State::setCurrentTemperature(Temperature_t temp)
+void State::setCurrentTemperature(Temperature_t &temp)
 {
     m_currentTemperature = temp;
     m_listener->currentTemperatureChanged();
@@ -96,16 +96,16 @@ WiFiStatus State::getWifiStatus() const
 
 Time_t State::getTime()
 {
-    m_client->update();
-    int day = (m_client->getDay() + 6) % 7;
-    int hour = m_client->getHours();
-    int min = m_client->getMinutes();
+    m_client.update();
+    int day = (m_client.getDay() + 6) % 7;
+    int hour = m_client.getHours();
+    int min = m_client.getMinutes();
     return Time_t{hour, min, day};
 }
 
 String State::getFormattedTime()
 {
-    return m_client->getFormattedTime();
+    return m_client.getFormattedTime();
 }
     
 void State::addListener(StateListener* listener)

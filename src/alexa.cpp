@@ -127,11 +127,12 @@ void AlexaController::powerStateChanged(Cause cause)
     }
 }
 
-void AlexaController::onUpdateEvent(UpdateEvent_t& event)
+void AlexaController::onUpdateEvent(const UpdateEvent_t& event)
 {
     if (event.type == UpdateEventType::START)
     {
-        SinricPro.stop();
+        if(SinricPro.isConnected())
+            SinricPro.stop();
     }
 }
 

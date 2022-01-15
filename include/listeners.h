@@ -1,6 +1,7 @@
 #pragma once
 
 #include <WString.h>
+#include <cstdio>
 
 class SettingsListener
 {
@@ -40,7 +41,16 @@ typedef struct UpdateEvent
 {
     UpdateEventType type;
     float progress;
+    //TODO probably not ok
     const char *message;
+
+    String toString() const {
+        char s[64];
+        const char *types[] = {"Start", "End", "Progress", "Error"};
+        sprintf(s, "UpdateEvent{type: %s, progress: %.3f, message: %s}", types[type], progress, message);
+        return s;
+    }
+
     bool operator==(const UpdateEvent &rhs) const
     {
         return this->type == rhs.type && this->progress == rhs.progress && this->message == rhs.message;
@@ -54,5 +64,5 @@ typedef struct UpdateEvent
 class UpdateListener
 {
 public:
-    virtual void onUpdateEvent(UpdateEvent_t &) = 0;
+    virtual void onUpdateEvent(const UpdateEvent_t &) = 0;
 };

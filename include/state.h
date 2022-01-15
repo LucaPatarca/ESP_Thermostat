@@ -56,7 +56,7 @@ public:
     void setTargetTemperature(Cause, float);
     void setPowerState(Cause, bool);
     void setThermostatMode(Cause, Mode);
-    void setCurrentTemperature(Temperature_t);
+    void setCurrentTemperature(Temperature_t&);
     void setwWifiStatus(WiFiStatus);
 
     bool getBoilerState() const;
@@ -80,7 +80,7 @@ private:
     WiFiStatus m_wifiStatus;
 
     WiFiUDP m_udp;
-    NTPClient *m_client;
+    NTPClient m_client;
 
     StateListener *m_listener;
 

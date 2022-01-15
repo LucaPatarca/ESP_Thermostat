@@ -5,12 +5,12 @@
 ProgramController::ProgramController()
     : m_state(State::Instance())
 {
-    _lastDay = -1;
-    _lastTime = -1;
+    m_lastDay = -1;
+    m_lastTime = -1;
 #ifdef PROGRAM_DEBUG
     Serial.printf("[ProgramController] EEPROM.begin(%d)\n", sizeof(WeekProgram));
 #endif
-    EEPROM.begin(sizeof(WeekProgram));
+    EEPROM.begin(sizeof(WeekProgram_t));
     loadProgram();
 }
 
@@ -39,12 +39,12 @@ void ProgramController::putTemperature(int day, int time, float temp)
     _program.days[day].temps[time] = value;
 }
 
-WeekProgram ProgramController::loadProgram()
+void ProgramController::loadProgram()
 {
 #ifdef PROGRAM_DEBUG
     Serial.printf("ProgramController::loadProgram()\n");
 #endif
-    return EEPROM.get(0, _program);
+    _program = EEPROM.get(0, _program);
 }
 
 bool ProgramController::saveProgram()
@@ -61,7 +61,7 @@ void ProgramController::applyProgram()
 #ifdef PROGRAM_DEBUG
     Serial.printf("ProgramController::applyProgram()\n");
 #endif
-    float target = getTemperature(_lastDay, _lastTime);
+    float target = getTemperature(m_lastDay, m_lastTime);
         if (target > 0)
         {
             m_state.setTargetTemperature(Cause::SCHEDULE, target);
@@ -72,7 +72,7 @@ void ProgramController::applyProgram()
         }
 
 #ifdef PROGRAM_DEBUG
-    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", _lastDay, _lastTime, _time.getFormattedTime().c_str(), target);
+    Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", m_lastDay, m_lastTime, _time.getFormattedTime().c_str(), target);
     for (int d = 0; d < 7; d++)
     {
         Serial.printf("day: %d\n[ ", d);
@@ -91,10 +91,10 @@ void ProgramController::handle()
     {
         Time_t time = m_state.getTime();
         int programTime = (time.hour*2)+(time.minutes>=30?1:0);
-        if (programTime != _lastTime || time.day != _lastDay)
+        if (programTime != m_lastTime || time.day != m_lastDay)
         {
-            _lastDay = time.day;
-            _lastTime = programTime;
+            m_lastDay = time.day;
+            m_lastTime = programTime;
             applyProgram();
         }
     }
@@ -103,40 +103,33 @@ void ProgramController::handle()
 void ProgramController::thermostatModeChanged()
 {
     //reset
-    _lastDay = -1;
-    _lastTime = -1;
+    m_lastDay = -1;
+    m_lastTime = -1;
 }
 
-ScheduleChange_t ProgramController::createEmptyChange()
-{
-    return {{0, 0, 0, 0, 0, 0, 0}, 0, 1, 0};
-}
-
-ScheduleChange_t ProgramController::parseChange(String value)
+int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 {
     DynamicJsonDocument doc(128);
     char *noCopy = (char *)value.c_str();
     DeserializationError error = deserializeJson(doc, noCopy, value.length());
 
-    ScheduleChange_t parsed = createEmptyChange();
-
     if (error)
     {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
-        return parsed;
+        return 1;
     }
 
     JsonArray days = doc["days"];
     for (int d : days)
     {
-        parsed.days[d] = 1;
+        change.days[d] = 1;
     }
 
-    parsed.fromTime = doc["fromHour"];
-    parsed.toTime = doc["toHour"];
+    change.fromTime = doc["fromHour"];
+    change.toTime = doc["toHour"];
 
-    parsed.temp = doc["temp"]; // 20.8
+    change.temp = doc["temp"]; // 20.8
 
 #ifdef PROGRAM_DEBUG
     Serial.printf("days:[");
@@ -147,10 +140,10 @@ ScheduleChange_t ProgramController::parseChange(String value)
     Serial.printf("], from: %d, to: %d, %.1f C\n", parsed.fromTime, parsed.toTime, parsed.temp);
 #endif
 
-    return parsed;
+    return 0;
 }
 
-void ProgramController::addScheduleChange(ScheduleChange_t change)
+void ProgramController::addScheduleChange(const ScheduleChange_t &change)
 {
     for (int i = 0; i < 7; i++)
     {
@@ -168,7 +161,7 @@ void ProgramController::addScheduleChange(ScheduleChange_t change)
     applyProgram();
 }
 
-void ProgramController::removeScheduleChange(ScheduleChange_t change)
+void ProgramController::removeScheduleChange(const ScheduleChange_t &change)
 {
     for (int i = 0; i < 7; i++)
     {
@@ -190,12 +183,16 @@ void ProgramController::onSetSetting(const String &key, String &value)
 {
     if (key == "ScheduleChange")
     {
-        ScheduleChange_t change = parseChange(value);
-        addScheduleChange(change);
+        ScheduleChange_t change;
+        int error = parseChange(change, value);
+        if(!error)
+            addScheduleChange(change);
     }
     else if (key == "ScheduleChangeRemove")
     {
-        ScheduleChange_t change = parseChange(value);
-        removeScheduleChange(change);
+        ScheduleChange_t change;
+        int error = parseChange(change, value);
+        if(!error)
+            removeScheduleChange(change);
     }
 }

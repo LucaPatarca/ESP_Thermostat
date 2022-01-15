@@ -18,6 +18,7 @@ void MainController::setup()
 {
     m_hwio.init();
     m_wifi.connect();
+    m_ota.setOnUpdateEvent([this](const UpdateEvent_t& event){onUpdateEvent(event);});
 }
 
 void MainController::handle()
@@ -75,7 +76,7 @@ void MainController::onSetSetting(const String& key, String& value)
     m_program.onSetSetting(key, value);
 }
 
-void MainController::onUpdateEvent(UpdateEvent_t& event)
+void MainController::onUpdateEvent(const UpdateEvent_t& event)
 {
     m_alexa.onUpdateEvent(event);
     m_hwio.onUpdateEvent(event);
