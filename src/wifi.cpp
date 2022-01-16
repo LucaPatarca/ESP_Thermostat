@@ -7,9 +7,9 @@
 
 WifiController::WifiController()
 {
-    wifiConnectHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event)
+    m_wifiConnectHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event)
                                                  { this->onWiFiConnect(event); });
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected &event)
+    m_wifiDisconnectHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected &event)
                                                            { this->onWiFiDisconnect(event); });
 }
 
@@ -22,12 +22,12 @@ void WifiController::onWiFiConnect(const WiFiEventStationModeGotIP &event)
 {
     INFO("connected");
     notifiStatus(WiFiStatus::CONNECTED);
-    _firstConnection = true;
+    m_firstConnection = true;
 }
 
 void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &event)
 {
-    FWARN("disconnected for reason: %d\n", event.reason);
+    WARN("disconnected for reason: %d\n", event.reason);
     if(event.reason == WiFiDisconnectReason::WIFI_DISCONNECT_REASON_AUTH_LEAVE){
         notifiStatus(WiFiStatus::DISCONNECTED);
     }
@@ -36,7 +36,7 @@ void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &ev
     }
     WiFi.disconnect();
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    if(!_firstConnection){
+    if(!m_firstConnection){
         notifiStatus(WiFiStatus::CONNECTING);
     }
 }

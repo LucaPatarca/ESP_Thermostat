@@ -2,8 +2,6 @@
 
 #include <state.h>
 
-// #define PROGRAM_DEBUG
-
 typedef struct {
     unsigned char temps[48];
 } DayProgram_t;

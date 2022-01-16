@@ -7,15 +7,11 @@
 #include <listeners.h>
 #include <functional>
 
-#define OTA_EVENT_INTERVAL 100
-
-// #define OTA_DEBUG
-
 class OTAController
 {
 private:
     State &m_state;
-    unsigned long _updateTime;
+    unsigned long m_updateTime;
     std::function<void(const UpdateEvent_t&)> onUpdateEvent;
 
     OTAController();

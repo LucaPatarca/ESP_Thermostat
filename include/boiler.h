@@ -2,10 +2,6 @@
 
 #include <state.h>
 
-#define TEMP_RANGE_LOW 1
-#define TEMP_RANGE_HIGH 0.3
-#define SAFE_TEMP 15
-
 enum TCase
 {
     OFF_ABOVE_SAFE_RANGE,

@@ -9,14 +9,12 @@
 
 #include <state.h>
 
-// #define WIFI_DEBUG
-
 class WifiController
 {
 private:
-    bool _firstConnection;
-    WiFiEventHandler wifiConnectHandler;
-    WiFiEventHandler wifiDisconnectHandler;
+    bool m_firstConnection;
+    WiFiEventHandler m_wifiConnectHandler;
+    WiFiEventHandler m_wifiDisconnectHandler;
 
     void notifiStatus(WiFiStatus);
 

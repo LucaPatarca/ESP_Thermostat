@@ -5,17 +5,6 @@
 #include <state.h>
 #include <listeners.h>
 
-// #define ALEXA_DEBUG
-
-#ifdef ALEXA_DEBUG
-#define DEBUG_ESP_PORT Serial
-#define NODEBUG_WEBSOCKETS
-#define NDEBUG
-#endif
-
-#define TEMP_UPDATE_THRESHOLD 0.2f
-#define HUMIDITY_UPDATE_THRESHOLD 5
-
 class AlexaController
 {
 public:

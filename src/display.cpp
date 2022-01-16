@@ -19,14 +19,14 @@ DisplayController::DisplayController()
     delay(100);
     m_display.dim(true);
     _setActiveScreen(&m_homeScreen);
-    INFO("display initialized");
+    FINE("display initialized");
 }
 
 void DisplayController::_setActiveScreen(Screen *screen)
 {
     if (m_activeScreen != screen)
     {
-        INFO("changing screen");
+        FINE("changing screen");
         m_changeInterval = SCREEN_INTERVAL;
         m_display.clearDisplay();
         m_activeScreen = screen;
@@ -36,7 +36,7 @@ void DisplayController::_setActiveScreen(Screen *screen)
 }
 
 void DisplayController::_notify(const String& text){
-    FINFO("displayng notification %s", text.c_str());
+    INFO("displayng notification %s", text.c_str());
     m_changeInterval = NOTIFICATION_INTERVAL;
     m_display.clearDisplay();
     m_notificationScreen.setText(text);

@@ -44,7 +44,7 @@ void Logger::onTargetTemperature(float temp)
 }
 
 void Logger::onThermostatMode(Mode mode){
-    //TODO implementare
+    
 }
 
 void Logger::onSetSetting(String key, String value){

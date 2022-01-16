@@ -1,6 +1,8 @@
 #include <ota.h>
 #include <sdebug.h>
 
+#define OTA_EVENT_INTERVAL 100
+
 OTAController::OTAController()
     : m_state(State::Instance())
 {
@@ -16,12 +18,12 @@ OTAController::OTAController()
                      });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
                           {
-                              if (millis() > _updateTime)
+                              if (millis() > m_updateTime)
                               {
                                   float percent = ((float)progress / ((float)total / 100));
-                                  FINFO("update progress %.2f", percent);
+                                  FINE("update progress %.2f", percent);
                                   onUpdateEvent(UpdateEvent_t{UpdateEventType::PROGRESS, percent, ""});
-                                  _updateTime = millis() + OTA_EVENT_INTERVAL;
+                                  m_updateTime = millis() + OTA_EVENT_INTERVAL;
                               }
                           });
     ArduinoOTA.onError([this](ota_error_t error)
@@ -39,7 +41,7 @@ OTAController::OTAController()
                                message = "End Failed";
                            else
                                message = "Unknown";
-                            FERROR("update error: %s", message);
+                            ERROR("update error: %s", message);
                             onUpdateEvent(UpdateEvent_t{UpdateEventType::ERROR, -1, message});
                        });
 }
@@ -54,9 +56,9 @@ void OTAController::wifiStatusChanged()
 
 void OTAController::connect()
 {
-    INFO("connecting...");
+    INFO("ota connecting...");
     ArduinoOTA.begin();
-    INFO("connected");
+    INFO("ota connected");
 }
 
 void OTAController::handle()

@@ -1,82 +1,91 @@
 #include <temperature.h>
 #include <sdebug.h>
 
+#define SMOOTH_FACTOR 4
+#define SENSOR_PIN D5
+
+#define TEMP_EVENT_INTERVAL 60000 //in milliseconds
+#define STABLE_THRESHOLD 10
+#define RISE_THRESHOLD 3
+#define DROP_THRESHOLD 3
+#define CHANGE_THRESHOLD 0.1
+
 TemperatureController::TemperatureController()
-    : _sensor(DHT(SENSOR_PIN, DHT22)),
-      _lastTrend(TemperatureTrend::STABLE)
+    : m_sensor(DHT(SENSOR_PIN, DHT22)),
+      m_lastTrend(TemperatureTrend::STABLE)
 {
-    _sensor.begin();
+    m_sensor.begin();
 }
 
 TemperatureTrend TemperatureController::computeTrend()
 {
-    if (_smoothTemp - _lastTemp > CHANGE_THRESHOLD)
+    if (m_smoothTemp - m_lastTemp > CHANGE_THRESHOLD)
     {
-        _riseCount++;
-        if (_riseCount >= RISE_THRESHOLD)
+        m_riseCount++;
+        if (m_riseCount >= RISE_THRESHOLD)
         {
-            _lastTemp = _smoothTemp;
-            _riseCount = 0;
-            _dropCount = 0;
-            _stableCount = 0;
+            m_lastTemp = m_smoothTemp;
+            m_riseCount = 0;
+            m_dropCount = 0;
+            m_stableCount = 0;
             return TemperatureTrend::RISE;
         }
     }
-    else if (_lastTemp - _smoothTemp > CHANGE_THRESHOLD)
+    else if (m_lastTemp - m_smoothTemp > CHANGE_THRESHOLD)
     {
-        _dropCount++;
-        if (_dropCount >= DROP_THRESHOLD)
+        m_dropCount++;
+        if (m_dropCount >= DROP_THRESHOLD)
         {
-            _lastTemp = _smoothTemp;
-            _dropCount = 0;
-            _riseCount = 0;
-            _stableCount = 0;
+            m_lastTemp = m_smoothTemp;
+            m_dropCount = 0;
+            m_riseCount = 0;
+            m_stableCount = 0;
             return TemperatureTrend::DROP;
         }
     }
     else
     {
-        _stableCount++;
-        if (_stableCount >= STABLE_THRESHOLD)
+        m_stableCount++;
+        if (m_stableCount >= STABLE_THRESHOLD)
         {
-            if (_lastTrend != TemperatureTrend::STABLE)
+            if (m_lastTrend != TemperatureTrend::STABLE)
             {
-                _lastTemp = _smoothTemp;
+                m_lastTemp = m_smoothTemp;
             }
-            _stableCount = 0;
-            _dropCount = 0;
-            _riseCount = 0;
+            m_stableCount = 0;
+            m_dropCount = 0;
+            m_riseCount = 0;
             return TemperatureTrend::STABLE;
         }
     }
-    return _lastTrend;
+    return m_lastTrend;
 }
 
 float TemperatureController::computeCoefficient()
 {
-    if (_smoothTemp > _lastTemp)
-        return _smoothTemp - _lastTemp;
+    if (m_smoothTemp > m_lastTemp)
+        return m_smoothTemp - m_lastTemp;
     else
-        return _lastTemp - _smoothTemp;
+        return m_lastTemp - m_smoothTemp;
 }
 
 void TemperatureController::handle()
 {
-    if (millis() > _updateTime)
+    if (millis() > m_updateTime)
     {
-        _smoothTemp = smoothe(_sensor.readTemperature(), _smoothTemp);
-        if (_lastTemp == 0)
-            _lastTemp = _smoothTemp;
-        float humidity = _sensor.readHumidity();
+        m_smoothTemp = smoothe(m_sensor.readTemperature(), m_smoothTemp);
+        if (m_lastTemp == 0)
+            m_lastTemp = m_smoothTemp;
+        float humidity = m_sensor.readHumidity();
 
         float coefficient = computeCoefficient();
-        _lastTrend = computeTrend();
+        m_lastTrend = computeTrend();
 
-        FINFO("setting temperature temp: %f trend: %d coefficient: %f humidity: %f", _smoothTemp, _lastTrend, coefficient, humidity);
+        INFO("setting temperature temp: %.3f trend: %s coefficient: %.3f humidity: %.3f", m_smoothTemp, State::Instance().tempTrendNames[m_lastTrend], coefficient, humidity);
 
-        State::Instance().setCurrentTemperature(Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient});
+        State::Instance().setCurrentTemperature(Temperature_t{m_smoothTemp, humidity, m_lastTrend, coefficient});
 
-        _updateTime = millis() + TEMP_EVENT_INTERVAL;
+        m_updateTime = millis() + TEMP_EVENT_INTERVAL;
     }
 }
 

@@ -3,14 +3,12 @@
 #include <ArduinoJson.h>
 #include <sdebug.h>
 
-//TODO add macro for debug purpose in a global .h file
-
 ProgramController::ProgramController()
-    : m_state(State::Instance())
+    : m_state(State::Instance()),
+    m_lastDay(-1),
+    m_lastTime(-1)
 {
-    m_lastDay = -1;
-    m_lastTime = -1;
-    FINFO("EEPROM.begin(%d)", sizeof(WeekProgram_t));
+    INFO("EEPROM.begin(%d)", sizeof(WeekProgram_t));
     EEPROM.begin(sizeof(WeekProgram_t));
     loadProgram();
 }
@@ -32,7 +30,7 @@ void ProgramController::putTemperature(int day, int time, float temp)
     {
         value = static_cast<unsigned char>((temp - 10) * 10);
     }
-    FINFO("putting %d to %d - %d\n", value, day, time);
+    FINE("putting %d to %d - %d\n", value, day, time);
     _program.days[day].temps[time] = value;
 }
 
@@ -63,7 +61,8 @@ void ProgramController::applyProgram()
             m_state.setPowerState(Cause::SCHEDULE, false);
         }
 
-#if LOG_LEVEL > LOG_LEVEL_WARN
+//logged at level FINE
+#if LOG_LEVEL > LOG_LEVEL_INFO
     Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", m_lastDay, m_lastTime, m_state.getFormattedTime().c_str(), target);
     for (int d = 0; d < 7; d++)
     {
@@ -107,8 +106,7 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 
     if (error)
     {
-        ERROR("deserializeJson() failed");
-        ERROR(error.f_str());
+        ERROR("deserializeJson() failed: %s", String(error.f_str()).c_str());
         return 1;
     }
 
@@ -123,7 +121,8 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 
     change.temp = doc["temp"]; // 20.8
 
-#if LOG_LEVEL > LOG_LEVEL_WARN
+//logged at level FINE
+#if LOG_LEVEL > LOG_LEVEL_INFO
     Serial.printf("days:[");
     for (int d : days)
     {

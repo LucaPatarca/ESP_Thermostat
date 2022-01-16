@@ -8,8 +8,6 @@
 #include <screen/NotificationScreen.h>
 #include <listeners.h>
 
-// #define HWIO_DEBUG 
-
 //TODO optimize object parameters by moving instead of copying (when possible)
 
 class DisplayController

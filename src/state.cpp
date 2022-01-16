@@ -4,7 +4,9 @@
 #define UTC_OFFSET 3600
 #define UPDATE_INTERVAL 1800000  //update every 30 minutes
 
-//TODO optimize updating the status only when it has actually been changed
+const char *State::thermostatModeNames[] = {"OFF", "ON", "PROGRAM"};
+const char *State::tempTrendNames[] = {"STABLE", "DROP", "RISE"};
+const char *State::wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING"};
 
 State::State()
     : m_boilerState(false),
@@ -20,15 +22,17 @@ State::State()
 
 void State::setBoilerState(bool state)
 {
+    if(state == m_boilerState) return;
     m_boilerState = state;
-    FINFO("boiler is now %s", state?"on":"off");
+    INFO("boiler is now %s", state?"on":"off");
     m_listener->boilerStateChanged();
 }
 
 void State::setTargetTemperature(Cause cause, float temp)
 {
+    if(temp == m_targetTemperature) return;
     m_targetTemperature = temp;
-    FINFO("target temp is now %.1f", temp);
+    INFO("target temp is now %.1f", temp);
     m_listener->targetTemperatureChanged(cause);
     if(cause != Cause::SCHEDULE)
         setThermostatMode(Cause::AUTO, Mode::ON);
@@ -36,39 +40,41 @@ void State::setTargetTemperature(Cause cause, float temp)
 
 void State::setPowerState(Cause cause, bool state)
 {
+    if(state == m_powerState) return;
     m_powerState = state;
-    FINFO("power state is now %s", state?"on":"off");
+    INFO("power state is now %s", state?"on":"off");
     m_listener->powerStateChanged(cause);
 
     if (cause != Cause::SCHEDULE)
     {
-        m_thermostatMode = state ? Mode::ON : Mode::OFF;
-        m_listener->thermostatModeChanged(Cause::AUTO);
+        setThermostatMode(Cause::AUTO, state ? Mode::ON : Mode::OFF);
     }
 }
 
 void State::setThermostatMode(Cause cause, Mode mode)
 {
+    if(mode == m_thermostatMode) return;
     m_thermostatMode = mode;
-    FINFO("thermostat mode is now %d", mode);
+    INFO("thermostat mode is now %s", thermostatModeNames[mode]);
     m_listener->thermostatModeChanged(cause);
     if (mode != Mode::PROGRAM)
     {
-        m_powerState = mode == Mode::ON;
-        m_listener->powerStateChanged(Cause::AUTO);
+        setPowerState(Cause::AUTO, mode == Mode::ON);
     }
 }
 
 void State::setCurrentTemperature(const Temperature_t &temp)
 {
-    FINFO("current temperature is now %.1f", temp.temp);
+    if(temp == m_currentTemperature) return;
+    INFO("current temperature is now %.1f", temp.temp);
     m_currentTemperature = temp;
     m_listener->currentTemperatureChanged();
 }
 
 void State::setwWifiStatus(WiFiStatus status)
 {
-    FINFO("wifi status is now %d", status);
+    if(status == m_wifiStatus) return;
+    INFO("wifi status is now %s", wifiStatusNames[status]);
     m_wifiStatus = status;
     m_listener->wifiStatusChanged();
 }

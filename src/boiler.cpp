@@ -1,6 +1,10 @@
 #include <boiler.h>
 #include <sdebug.h>
 
+#define TEMP_RANGE_LOW 1
+#define TEMP_RANGE_HIGH 0.3
+#define SAFE_TEMP 15
+
 BoilerController::BoilerController()
     : m_state(State::Instance())
 {
@@ -23,7 +27,7 @@ void BoilerController::targetTemperatureChanged()
 
 void BoilerController::compute()
 {
-    INFO("computing...");
+    FINE("computing...");
     TCase tempCase = getTempCase();
     switch (tempCase)
     {

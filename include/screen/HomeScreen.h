@@ -3,8 +3,6 @@
 #include <screen/components.h>
 #include <state.h>
 
-//TODO replace every pointer with a reference or member object when possible
-
 class HomeScreen: public Screen {
 private:
     TargetTemp m_targetTemp;

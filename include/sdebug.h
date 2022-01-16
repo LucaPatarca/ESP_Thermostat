@@ -1,36 +1,33 @@
+#pragma once
+
 #define LOG_LEVEL_OFF 0
 #define LOG_LEVEL_ERROR 1
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_INFO 3
-#define LOG_LEVEL LOG_LEVEL_WARN
-
-//TODO add fine
+#define LOG_LEVEL_FINE 4
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 #if LOG_LEVEL > LOG_LEVEL_OFF
-#define FLOG(severity, ...) Serial.printf("% 8.3fs %15s  [%s]  ", millis()/1000.0f, __FILE__, severity);\
+#define LOG(severity, ...) Serial.printf("% 9.3fs [%s]  %15s  : ", millis()/1000.0f, severity, __FILE__);\
     Serial.printf(__VA_ARGS__);\
-    Serial.printf("\n")
-#define LOG(severity, string) Serial.printf("% 8.3fs %15s  [%s]  ", millis()/1000.0f, __FILE__, severity);\
-    Serial.print(string);\
     Serial.print("\n")
 #else
 #define LOG(severity, ...)
-#define FLOG(severity, ...)
 #endif
 
-#if LOG_LEVEL > LOG_LEVEL_WARN
-#define FINFO(...) FLOG("INFO", __VA_ARGS__)
-#define INFO(string) LOG("INFO", string)
+#if LOG_LEVEL > LOG_LEVEL_INFO
+#define FINE(...) LOG("FINE", __VA_ARGS__)
 #else
-#define FINFO(...)
+#define FINE(...)
+#endif
+#if LOG_LEVEL > LOG_LEVEL_WARN
+#define INFO(...) LOG("INFO", __VA_ARGS__)
+#else
 #define INFO(...)
 #endif
 #if LOG_LEVEL > LOG_LEVEL_ERROR
-#define FWARN(...) FLOG("WARN", __VA_ARGS__)
-#define WARN(string) LOG("WARN", string)
+#define WARN(...) LOG("WARN", __VA_ARGS__)
 #else
-#define FWARN(...)
 #define WARN(...)
 #endif
-#define FERROR(...) FLOG("ERROR", __VA_ARGS__)
-#define ERROR(string) LOG("ERROR", string)
+#define ERROR(...) LOG("ERROR", __VA_ARGS__)

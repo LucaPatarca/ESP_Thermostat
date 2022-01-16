@@ -18,12 +18,19 @@ enum TemperatureTrend
     RISE,
 };
 
-typedef struct
+typedef struct Temperature
 {
     float temp;
     float humidity;
     TemperatureTrend trend;
     float coefficient;
+
+    bool operator ==(const Temperature &other) const {
+        return !(temp - other.temp >= 0.1 || other.temp - temp >= 0.1) &&
+            !(humidity - other.humidity >= 0.5 || other.humidity - humidity >= 0.5) &&
+            trend == other.trend &&
+            !(coefficient - other.coefficient >= 0.05 || other.coefficient - coefficient >= 0.05);
+    }
 } Temperature_t;
 
 enum WiFiStatus
@@ -37,7 +44,7 @@ typedef struct Time{
     int hour;
     int minutes;
     int day;
-    bool operator !=(Time &rhs) const {
+    bool operator !=(const Time &rhs) const {
         return this->hour != rhs.hour && this->minutes != rhs.minutes && this->day != rhs.day;
     }
 } Time_t;
@@ -70,6 +77,10 @@ public:
     String getFormattedTime();
 
     void addListener(StateListener*);
+
+    static const char *thermostatModeNames[];
+    static const char *tempTrendNames[];
+    static const char *wifiStatusNames[];
 
 private:
     bool m_boilerState;
