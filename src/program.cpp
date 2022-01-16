@@ -2,6 +2,8 @@
 #include <ESP_EEPROM.h>
 #include <ArduinoJson.h>
 
+//TODO add macro for debug purpose in a global .h file
+
 ProgramController::ProgramController()
     : m_state(State::Instance())
 {
@@ -65,6 +67,7 @@ void ProgramController::applyProgram()
         if (target > 0)
         {
             m_state.setTargetTemperature(Cause::SCHEDULE, target);
+            m_state.setPowerState(Cause::SCHEDULE, true);
         }
         else
         {

@@ -3,7 +3,7 @@
 
 class UpdateScreen: public Screen{
 public:
-    UpdateScreen(Adafruit_SSD1306 *display);
+    UpdateScreen(Adafruit_SSD1306 &display);
 
     void onUpdateEvent(const UpdateEvent_t&);
 

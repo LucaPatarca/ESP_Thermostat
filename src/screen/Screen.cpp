@@ -1,21 +1,22 @@
 #include <screen/screen.h>
 
-Screen::Screen(Adafruit_SSD1306 *display){
-    _display = display;
+Screen::Screen(Adafruit_SSD1306 &display)
+    : m_display(display)
+{
 }
 
-AnimatedScreenElement::AnimatedScreenElement(Adafruit_SSD1306 *display, int interval, int x, int y)
+AnimatedScreenElement::AnimatedScreenElement(Adafruit_SSD1306 &display, int interval, int x, int y)
     : ScreenElement(display, x, y)
 {
-    _interval = interval;
+    m_interval = interval;
 }
 
 void AnimatedScreenElement::tick()
 {
-    if(millis() > _lastTick + _interval){
+    if(millis() > m_lastTick + m_interval){
         tickImpl();
-        this->_needUpdate = true;
-        _lastTick = millis();
+        this->m_needUpdate = true;
+        m_lastTick = millis();
     }
 }
 
@@ -25,31 +26,31 @@ void AnimatedScreenElement::draw()
     ScreenElement::draw();
 }
 
-ScreenElement::ScreenElement(Adafruit_SSD1306 *display, int x, int y)
+ScreenElement::ScreenElement(Adafruit_SSD1306 &display, int x, int y)
+    : m_display(display),
+    m_needUpdate(true),
+    m_x(x),
+    m_y(y)
 {
-    _display = display;
-    _x = x;
-    _y = y;
-    _needUpdate = true;
 }
 
 void ScreenElement::_setDisplay(int size, int x, int y){
-    _display->setFont();
-    _display->setTextSize(size);
-    _display->setTextColor(WHITE, BLACK);
-    _display->setCursor(x, y);
+    m_display.setFont();
+    m_display.setTextSize(size);
+    m_display.setTextColor(WHITE, BLACK);
+    m_display.setCursor(x, y);
 }
 
 void ScreenElement::draw()
 {
-    if (_needUpdate)
+    if (m_needUpdate)
     {
         drawImpl();
 
-        _needUpdate = false;
+        m_needUpdate = false;
     }
 }
 
 void ScreenElement::refresh(){
-    _needUpdate = true;
+    m_needUpdate = true;
 }

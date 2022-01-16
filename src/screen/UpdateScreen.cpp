@@ -1,7 +1,7 @@
 #include <screen/UpdateScreen.h>
 #include <listeners.h>
 
-UpdateScreen::UpdateScreen(Adafruit_SSD1306 *display) : Screen(display)
+UpdateScreen::UpdateScreen(Adafruit_SSD1306 &display) : Screen(display)
 {
 }
 
@@ -10,25 +10,25 @@ void UpdateScreen::onUpdateEvent(const UpdateEvent_t& event)
     switch (event.type)
     {
     case UpdateEventType::START:
-        _display->clearDisplay();
-        _display->setTextSize(1);
-        _display->setTextColor(WHITE, BLACK);
-        _display->setCursor(0, 24);
-        _display->setFont(&FreeSans12pt7b);
-        _display->println("  Updating");
-        _display->drawRect(14, 42, 100, 12, WHITE);
+        m_display.clearDisplay();
+        m_display.setTextSize(1);
+        m_display.setTextColor(WHITE, BLACK);
+        m_display.setCursor(0, 24);
+        m_display.setFont(&FreeSans12pt7b);
+        m_display.println("  Updating");
+        m_display.drawRect(14, 42, 100, 12, WHITE);
         break;
     case UpdateEventType::PROGRESS:
-        _display->fillRect(14, 42, (int)event.progress, 12, WHITE);
+        m_display.fillRect(14, 42, (int)event.progress, 12, WHITE);
         break;
     case UpdateEventType::END:
-        _display->clearDisplay();
-        _display->setTextSize(1);
-        _display->setTextColor(WHITE, BLACK);
-        _display->setCursor(0, 18);
-        _display->setFont(&FreeSans12pt7b);
-        _display->println("    Update");
-        _display->println(" Completed");
+        m_display.clearDisplay();
+        m_display.setTextSize(1);
+        m_display.setTextColor(WHITE, BLACK);
+        m_display.setCursor(0, 18);
+        m_display.setFont(&FreeSans12pt7b);
+        m_display.println("    Update");
+        m_display.println(" Completed");
         break;
     //TODO handle errors
     default:

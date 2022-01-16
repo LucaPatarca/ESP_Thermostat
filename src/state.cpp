@@ -25,7 +25,8 @@ void State::setTargetTemperature(Cause cause, float temp)
 {
     m_targetTemperature = temp;
     m_listener->targetTemperatureChanged(cause);
-    setThermostatMode(Cause::AUTO, Mode::ON);
+    if(cause != Cause::SCHEDULE)
+        setThermostatMode(Cause::AUTO, Mode::ON);
 }
 
 void State::setPowerState(Cause cause, bool state)
@@ -51,7 +52,7 @@ void State::setThermostatMode(Cause cause, Mode mode)
     }
 }
 
-void State::setCurrentTemperature(Temperature_t &&temp)
+void State::setCurrentTemperature(const Temperature_t &temp)
 {
     m_currentTemperature = temp;
     m_listener->currentTemperatureChanged();

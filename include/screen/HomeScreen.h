@@ -3,20 +3,17 @@
 #include <screen/components.h>
 #include <state.h>
 
-//TODO continuare
+//TODO replace every pointer with a reference or member object when possible
 
 class HomeScreen: public Screen {
 private:
-    float _lastTargetTemp;
-    float _lastPowerState;
-
-    ScreenElement *_targetTemp;
-    ScreenElement *_currentTemp;
-    ScreenElement *_currentHumidity;
-    ScreenElement *_boilerState;
-    ScreenElement *_tempTrend;
+    TargetTemp m_targetTemp;
+    CurrentTemp m_currentTemp;
+    CurrentHumidity m_currentHumidity;
+    BoilerState m_boilerState;
+    TempTrend m_tempTrend;
 public:
-    HomeScreen(Adafruit_SSD1306 *display);
+    HomeScreen(Adafruit_SSD1306 &display);
 
     void boilerStateChanged();
     void powerStateChanged();

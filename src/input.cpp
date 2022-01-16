@@ -13,6 +13,7 @@ InputController::InputController()
 
 void InputController::handle()
 {
+    //TODO check for multiple buttons pressed at the same time, this can be also used to activate special modes such as the sos mode
     if (millis() > _lastEventTime + EVENT_INTERVAL)
     {
         if (digitalRead(MODE_PIN) == HIGH)

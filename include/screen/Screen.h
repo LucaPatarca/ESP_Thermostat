@@ -6,23 +6,23 @@
 
 class Screen{
 protected:
-    Adafruit_SSD1306 *_display;
+    Adafruit_SSD1306 &m_display;
 public:
-    Screen(Adafruit_SSD1306 *display);
+    Screen(Adafruit_SSD1306 &display);
     virtual void draw() = 0;
     virtual void refresh() = 0;
 };
 
 class ScreenElement{
 protected:
-    Adafruit_SSD1306 *_display;
-    bool _needUpdate;
-    int _x;
-    int _y;
+    Adafruit_SSD1306 &m_display;
+    bool m_needUpdate;
+    int m_x;
+    int m_y;
 
     void _setDisplay(int size, int x, int y);
 public:
-    ScreenElement(Adafruit_SSD1306 *_display, int x, int y);
+    ScreenElement(Adafruit_SSD1306 &m_display, int x, int y);
 
     virtual void draw();
     void refresh();
@@ -33,11 +33,11 @@ public:
 class AnimatedScreenElement: public ScreenElement
 {
 protected:
-    int _animStatus;
-    int _interval;
-    unsigned long _lastTick;
+    int m_animStatus;
+    int m_interval;
+    unsigned long m_lastTick;
 public:
-    AnimatedScreenElement(Adafruit_SSD1306 *display, int interval, int x, int y);
+    AnimatedScreenElement(Adafruit_SSD1306 &display, int interval, int x, int y);
 
     void tick();
     void draw() override;

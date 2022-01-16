@@ -1,6 +1,9 @@
 #include <wifi.h>
 #include <credentials.h>
 
+//TODO add emergency mode that should be used to set things like the time and the program (when there is no internet)
+// evaluate if it's better to implement with udp broadcast using router or by making the thermostat a router (less elengant but safer)
+
 WifiController::WifiController()
 {
     wifiConnectHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event)

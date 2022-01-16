@@ -1,7 +1,7 @@
 #include <listeners.h>
 #include <wifi.h>
 #include <boiler.h>
-#include <hwio.h>
+#include <display.h>
 #include <alexa.h>
 #include <ota.h>
 #include <temperature.h>
@@ -33,7 +33,7 @@ public:
 
 private:
     BoilerController &m_thermostat;
-    HWIOController &m_hwio;
+    DisplayController &m_display;
     AlexaController &m_alexa;
     OTAController &m_ota;
     TemperatureController &m_temperature;

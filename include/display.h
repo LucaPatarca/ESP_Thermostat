@@ -5,18 +5,20 @@
 #include <screen/HomeScreen.h>
 #include <screen/UpdateScreen.h>
 #include <screen/TimeScreen.h>
+#include <screen/NotificationScreen.h>
 #include <listeners.h>
 
 // #define HWIO_DEBUG 
-#define SCREEN_INTERVAL 10000    //in milliseconds
 
-class HWIOController
+//TODO optimize object parameters by moving instead of copying (when possible)
+
+class DisplayController
 {
 public:
-    HWIOController(const HWIOController&) = delete;
+    DisplayController(const DisplayController&) = delete;
 
-    static HWIOController& Instance(){
-        static HWIOController controller;
+    static DisplayController& Instance(){
+        static DisplayController controller;
         return controller;
     }
     
@@ -30,18 +32,20 @@ public:
     void onUpdateEvent(const UpdateEvent_t&);
 
     void handle();
-    void init();
 private:
-    Adafruit_SSD1306 *m_display;
+    Adafruit_SSD1306 m_display;
     unsigned long m_lastChange;
+    int m_changeInterval;
     
-    HomeScreen *m_homeScreen;
-    UpdateScreen *m_updateScreen;
-    TimeScreen *m_timeScreen;
+    HomeScreen m_homeScreen;
+    UpdateScreen m_updateScreen;
+    TimeScreen m_timeScreen;
+    NotificationScreen m_notificationScreen;
     
     Screen *m_activeScreen;
 
-    void _setActiveScreen(Screen *screen);
+    void _setActiveScreen(Screen *);
+    void _notify(const String&);
 
-    HWIOController();
+    DisplayController();
 };

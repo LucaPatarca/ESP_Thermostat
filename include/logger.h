@@ -29,3 +29,6 @@ public:
     void onSetSetting(String, String) override;
 };
 #endif
+
+//TODO repair logger
+//TODO add everywhere options to disable certain features using defines

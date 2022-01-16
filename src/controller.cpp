@@ -2,7 +2,7 @@
 
 MainController::MainController()
     : m_thermostat(BoilerController::Instance()),
-    m_hwio(HWIOController::Instance()),
+    m_display(DisplayController::Instance()),
     m_alexa(AlexaController::Instance()),
     m_ota(OTAController::Instance()),
     m_temperature(TemperatureController::Instance()),
@@ -17,7 +17,6 @@ MainController::MainController()
 
 void MainController::setup()
 {
-    m_hwio.init();
     m_wifi.connect();
     m_ota.setOnUpdateEvent([this](const UpdateEvent_t& event){onUpdateEvent(event);});
 }
@@ -28,47 +27,47 @@ void MainController::handle()
     m_ota.handle();
     m_temperature.handle();
     m_program.handle();
-    m_hwio.handle();
     m_input.handle();
+    m_display.handle();
 }
 
 void MainController::targetTemperatureChanged(Cause cause)
 {
+    m_display.targetTemperatureChanged(cause);
     m_alexa.targetTemperatureChanged(cause);
     m_thermostat.targetTemperatureChanged();
-    m_hwio.targetTemperatureChanged(cause);
 }
 
 void MainController::powerStateChanged(Cause cause)
 {
+    m_display.powerStateChanged();
     m_alexa.powerStateChanged(cause);
     m_thermostat.powerStateChanged();
-    m_hwio.powerStateChanged();
 }
 
 void MainController::thermostatModeChanged(Cause cause)
 {
+    m_display.thermostatModeChanged(cause);
     m_alexa.thermostatModeChanged(cause);
-    m_hwio.thermostatModeChanged(cause);
     m_program.thermostatModeChanged();
 }
 
 void MainController::boilerStateChanged()
 {
-    m_hwio.boilerStateChanged();
+    m_display.boilerStateChanged();
 }
 
 void MainController::currentTemperatureChanged()
 {
+    m_display.currentTemperatureChanged();
     m_alexa.currentTemperatureChanged();
     m_thermostat.currentTemperatureChanged();
-    m_hwio.currentTemperatureChanged();
 }
 
 void MainController::wifiStatusChanged()
 {
+    m_display.wifiStatusChanged();
     m_alexa.wifiStatusChanged();
-    m_hwio.wifiStatusChanged();
     m_ota.wifiStatusChanged();
 }
 
@@ -80,6 +79,6 @@ void MainController::onSetSetting(const String& key, String& value)
 void MainController::onUpdateEvent(const UpdateEvent_t& event)
 {
     m_alexa.onUpdateEvent(event);
-    m_hwio.onUpdateEvent(event);
+    m_display.onUpdateEvent(event);
 }
 
