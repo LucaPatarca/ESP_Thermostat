@@ -2,6 +2,13 @@
 
 #include <input.h>
 #include <Arduino.h>
+#include <sdebug.h>
+
+#define EVENT_INTERVAL 300      //in milliseconds
+#define TEMP_CHANGE 0.1         //in degrees
+#define MODE_PIN D6
+#define TEMP_UP_PIN D8
+#define TEMP_DOWN_PIN D7
 
 InputController::InputController()
     : m_state(State::Instance())
@@ -13,31 +20,33 @@ InputController::InputController()
 
 void InputController::handle()
 {
-    //TODO check for multiple buttons pressed at the same time, this can be also used to activate special modes such as the sos mode
     if (millis() > _lastEventTime + EVENT_INTERVAL)
     {
-        if (digitalRead(MODE_PIN) == HIGH)
+        int modePin = digitalRead(MODE_PIN);
+        int tempUpPin = digitalRead(TEMP_UP_PIN);
+        int tempDownPin = digitalRead(TEMP_DOWN_PIN);
+        if(modePin + tempUpPin + tempDownPin > 1)
         {
+            WARN("multiple buttons pressed together, nothing will happen");
+            _lastEventTime = millis();
+            return;
+        }
+        if (modePin == HIGH)
+        {
+            INFO("mode button pressed");
             m_state.setThermostatMode(Cause::MANUAL, static_cast<Mode>((m_state.getThermostatMode() + 1) % 3));
-#ifdef INPUT_DEBUG
-            printf("selected mode: %d\n", _lastMode);
-#endif
             _lastEventTime = millis();
         }
-        else if (digitalRead(TEMP_UP_PIN) == HIGH)
+        else if (tempUpPin == HIGH)
         {
+            INFO("temperature + pressed");
             m_state.setTargetTemperature(Cause::MANUAL, m_state.getTargetTemperature() + TEMP_CHANGE);
-#ifdef INPUT_DEBUG
-            printf("Temp +\n");
-#endif
             _lastEventTime = millis();
         }
-        else if (digitalRead(TEMP_DOWN_PIN) == HIGH)
+        else if (tempDownPin == HIGH)
         {
+            INFO("temperature - pressed");
             m_state.setTargetTemperature(Cause::MANUAL, m_state.getTargetTemperature() - TEMP_CHANGE);
-#ifdef INPUT_DEBUG
-            printf("Temp -\n");
-#endif
             _lastEventTime = millis();
         }
     }

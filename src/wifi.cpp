@@ -1,5 +1,6 @@
 #include <wifi.h>
 #include <credentials.h>
+#include <sdebug.h>
 
 //TODO add emergency mode that should be used to set things like the time and the program (when there is no internet)
 // evaluate if it's better to implement with udp broadcast using router or by making the thermostat a router (less elengant but safer)
@@ -19,18 +20,14 @@ void WifiController::notifiStatus(WiFiStatus status)
 
 void WifiController::onWiFiConnect(const WiFiEventStationModeGotIP &event)
 {
-#ifdef WIFI_DEBUG
-    Serial.printf("\r\n[Wifi]: Connected\n");
-#endif
+    INFO("connected");
     notifiStatus(WiFiStatus::CONNECTED);
     _firstConnection = true;
 }
 
 void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &event)
 {
-#ifdef WIFI_DEBUG
-    Serial.printf("\r\n[Wifi]: Disconnected for reason: %d\n", event.reason);
-#endif
+    FWARN("disconnected for reason: %d\n", event.reason);
     if(event.reason == WiFiDisconnectReason::WIFI_DISCONNECT_REASON_AUTH_LEAVE){
         notifiStatus(WiFiStatus::DISCONNECTED);
     }
@@ -46,9 +43,7 @@ void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &ev
 
 void WifiController::connect()
 {
-#ifdef WIFI_DEBUG
-    Serial.printf("\r\n[Wifi]: Connecting\n");
-#endif
+    INFO("connecting");
     notifiStatus(WiFiStatus::CONNECTING);
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS);

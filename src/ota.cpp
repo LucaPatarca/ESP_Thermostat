@@ -1,24 +1,26 @@
 #include <ota.h>
+#include <sdebug.h>
 
 OTAController::OTAController()
     : m_state(State::Instance())
 {
     ArduinoOTA.onStart([this]()
                        {
-                           UpdateEvent_t event = UpdateEvent_t{UpdateEventType::START, 0, ""};
-                           onUpdateEvent(event);
+                           INFO("update started");
+                           onUpdateEvent(UpdateEvent_t{UpdateEventType::START, 0, ""});
                        });
     ArduinoOTA.onEnd([this]()
                      {
-                         UpdateEvent_t event = UpdateEvent_t{UpdateEventType::END, 100, ""};
-                         onUpdateEvent(event);
+                         INFO("update completed");
+                         onUpdateEvent(UpdateEvent_t{UpdateEventType::END, 100, ""});
                      });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
                           {
                               if (millis() > _updateTime)
                               {
-                                  UpdateEvent_t event = UpdateEvent_t{UpdateEventType::PROGRESS, ((float)progress / ((float)total / 100)), ""};
-                                  onUpdateEvent(event);
+                                  float percent = ((float)progress / ((float)total / 100));
+                                  FINFO("update progress %.2f", percent);
+                                  onUpdateEvent(UpdateEvent_t{UpdateEventType::PROGRESS, percent, ""});
                                   _updateTime = millis() + OTA_EVENT_INTERVAL;
                               }
                           });
@@ -37,8 +39,8 @@ OTAController::OTAController()
                                message = "End Failed";
                            else
                                message = "Unknown";
-                           UpdateEvent_t event = UpdateEvent_t{UpdateEventType::ERROR, -1, message};
-                           onUpdateEvent(event);
+                            FERROR("update error: %s", message);
+                            onUpdateEvent(UpdateEvent_t{UpdateEventType::ERROR, -1, message});
                        });
 }
 
@@ -52,13 +54,9 @@ void OTAController::wifiStatusChanged()
 
 void OTAController::connect()
 {
-#ifdef OTA_DEBUG
-    Serial.printf("[OTAController] connecting...\n");
-#endif
+    INFO("connecting...");
     ArduinoOTA.begin();
-#ifdef OTA_DEBUG
-    Serial.printf("[OTAController] connected\n");
-#endif
+    INFO("connected");
 }
 
 void OTAController::handle()

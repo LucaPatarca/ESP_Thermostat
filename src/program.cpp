@@ -1,6 +1,7 @@
 #include <program.h>
 #include <ESP_EEPROM.h>
 #include <ArduinoJson.h>
+#include <sdebug.h>
 
 //TODO add macro for debug purpose in a global .h file
 
@@ -9,9 +10,7 @@ ProgramController::ProgramController()
 {
     m_lastDay = -1;
     m_lastTime = -1;
-#ifdef PROGRAM_DEBUG
-    Serial.printf("[ProgramController] EEPROM.begin(%d)\n", sizeof(WeekProgram_t));
-#endif
+    FINFO("EEPROM.begin(%d)", sizeof(WeekProgram_t));
     EEPROM.begin(sizeof(WeekProgram_t));
     loadProgram();
 }
@@ -33,36 +32,26 @@ void ProgramController::putTemperature(int day, int time, float temp)
     {
         value = static_cast<unsigned char>((temp - 10) * 10);
     }
-
-#ifdef PROGRAM_DEBUG
-    Serial.printf("putting %d to %d - %d\n", value, day, time);
-#endif
-
+    FINFO("putting %d to %d - %d\n", value, day, time);
     _program.days[day].temps[time] = value;
 }
 
 void ProgramController::loadProgram()
 {
-#ifdef PROGRAM_DEBUG
-    Serial.printf("ProgramController::loadProgram()\n");
-#endif
+    INFO("loading program");
     _program = EEPROM.get(0, _program);
 }
 
 bool ProgramController::saveProgram()
 {
-#ifdef PROGRAM_DEBUG
-    Serial.printf("ProgramController::saveProgram()\n");
-#endif
+    INFO("saving program");
     EEPROM.put(0, _program);
     return EEPROM.commit();
 }
 
 void ProgramController::applyProgram()
 {
-#ifdef PROGRAM_DEBUG
-    Serial.printf("ProgramController::applyProgram()\n");
-#endif
+    INFO("applying program");
     float target = getTemperature(m_lastDay, m_lastTime);
         if (target > 0)
         {
@@ -74,7 +63,7 @@ void ProgramController::applyProgram()
             m_state.setPowerState(Cause::SCHEDULE, false);
         }
 
-#ifdef PROGRAM_DEBUG
+#if LOG_LEVEL > LOG_LEVEL_WARN
     Serial.printf("[ProgramController] day: %d, time: %d, formatted: %s, target: %.1f\n", m_lastDay, m_lastTime, m_state.getFormattedTime().c_str(), target);
     for (int d = 0; d < 7; d++)
     {
@@ -118,8 +107,8 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 
     if (error)
     {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.f_str());
+        ERROR("deserializeJson() failed");
+        ERROR(error.f_str());
         return 1;
     }
 
@@ -134,7 +123,7 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 
     change.temp = doc["temp"]; // 20.8
 
-#ifdef PROGRAM_DEBUG
+#if LOG_LEVEL > LOG_LEVEL_WARN
     Serial.printf("days:[");
     for (int d : days)
     {
@@ -148,6 +137,7 @@ int ProgramController::parseChange(ScheduleChange_t& change, String &value)
 
 void ProgramController::addScheduleChange(const ScheduleChange_t &change)
 {
+    INFO("adding schedule change");
     for (int i = 0; i < 7; i++)
     {
         if (change.days[i])
@@ -166,6 +156,7 @@ void ProgramController::addScheduleChange(const ScheduleChange_t &change)
 
 void ProgramController::removeScheduleChange(const ScheduleChange_t &change)
 {
+    INFO("removing schedule change");
     for (int i = 0; i < 7; i++)
     {
         if (change.days[i])

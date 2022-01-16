@@ -1,9 +1,9 @@
-#include <Arduino.h>
-#include "temperature.h"
+#include <temperature.h>
+#include <sdebug.h>
 
 TemperatureController::TemperatureController()
     : _sensor(DHT(SENSOR_PIN, DHT22)),
-    _lastTrend(TemperatureTrend::STABLE)
+      _lastTrend(TemperatureTrend::STABLE)
 {
     _sensor.begin();
 }
@@ -65,16 +65,15 @@ void TemperatureController::handle()
     if (millis() > _updateTime)
     {
         _smoothTemp = smoothe(_sensor.readTemperature(), _smoothTemp);
-        if(_lastTemp==0) _lastTemp = _smoothTemp;
+        if (_lastTemp == 0)
+            _lastTemp = _smoothTemp;
         float humidity = _sensor.readHumidity();
 
         float coefficient = computeCoefficient();
         _lastTrend = computeTrend();
 
-#ifdef TEMPERATURE_DEBUG
-        String s[] = {"Drop", "Rise", "Stable"};
-        Serial.printf("Temp: %f\nTrend: %s\nCoefficient: %f\nHumidity: %f\n\n", _smoothTemp, s[_lastTrend].c_str(), coefficient, humidity);
-#endif
+        FINFO("setting temperature temp: %f trend: %d coefficient: %f humidity: %f", _smoothTemp, _lastTrend, coefficient, humidity);
+
         State::Instance().setCurrentTemperature(Temperature_t{_smoothTemp, humidity, _lastTrend, coefficient});
 
         _updateTime = millis() + TEMP_EVENT_INTERVAL;

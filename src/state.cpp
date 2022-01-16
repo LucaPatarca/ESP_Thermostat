@@ -1,7 +1,10 @@
 #include <state.h>
+#include <sdebug.h>
 
 #define UTC_OFFSET 3600
 #define UPDATE_INTERVAL 1800000  //update every 30 minutes
+
+//TODO optimize updating the status only when it has actually been changed
 
 State::State()
     : m_boilerState(false),
@@ -18,12 +21,14 @@ State::State()
 void State::setBoilerState(bool state)
 {
     m_boilerState = state;
+    FINFO("boiler is now %s", state?"on":"off");
     m_listener->boilerStateChanged();
 }
 
 void State::setTargetTemperature(Cause cause, float temp)
 {
     m_targetTemperature = temp;
+    FINFO("target temp is now %.1f", temp);
     m_listener->targetTemperatureChanged(cause);
     if(cause != Cause::SCHEDULE)
         setThermostatMode(Cause::AUTO, Mode::ON);
@@ -32,6 +37,7 @@ void State::setTargetTemperature(Cause cause, float temp)
 void State::setPowerState(Cause cause, bool state)
 {
     m_powerState = state;
+    FINFO("power state is now %s", state?"on":"off");
     m_listener->powerStateChanged(cause);
 
     if (cause != Cause::SCHEDULE)
@@ -44,6 +50,7 @@ void State::setPowerState(Cause cause, bool state)
 void State::setThermostatMode(Cause cause, Mode mode)
 {
     m_thermostatMode = mode;
+    FINFO("thermostat mode is now %d", mode);
     m_listener->thermostatModeChanged(cause);
     if (mode != Mode::PROGRAM)
     {
@@ -54,12 +61,14 @@ void State::setThermostatMode(Cause cause, Mode mode)
 
 void State::setCurrentTemperature(const Temperature_t &temp)
 {
+    FINFO("current temperature is now %.1f", temp.temp);
     m_currentTemperature = temp;
     m_listener->currentTemperatureChanged();
 }
 
 void State::setwWifiStatus(WiFiStatus status)
 {
+    FINFO("wifi status is now %d", status);
     m_wifiStatus = status;
     m_listener->wifiStatusChanged();
 }

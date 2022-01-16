@@ -1,4 +1,5 @@
 #include <boiler.h>
+#include <sdebug.h>
 
 BoilerController::BoilerController()
     : m_state(State::Instance())
@@ -22,6 +23,7 @@ void BoilerController::targetTemperatureChanged()
 
 void BoilerController::compute()
 {
+    INFO("computing...");
     TCase tempCase = getTempCase();
     switch (tempCase)
     {
@@ -29,6 +31,7 @@ void BoilerController::compute()
     case TCase::BELOW_LOW_RANGE:
     case TCase::BELOW_RANGE_HIGH_NOT_RISING:
     case TCase::BELOW_TARGET_DROPPING:
+        INFO("setting boiler on");
         m_state.setBoilerState(true);
         break;
 
@@ -36,6 +39,7 @@ void BoilerController::compute()
     case TCase::BELOW_RANGE_HIGH_RISING:
     case TCase::BELOW_TARGET_NOT_DROPPING:
     case TCase::ABOVE_TARGET:
+        INFO("setting boiler off");
         m_state.setBoilerState(false);
         break;
 
