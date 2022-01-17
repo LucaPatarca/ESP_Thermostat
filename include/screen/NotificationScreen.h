@@ -1,3 +1,7 @@
+#pragma once
+
+#ifndef NO_DISPLAY
+
 #include <screen/screen.h>
 
 class NotificationScreen : public Screen
@@ -13,3 +17,5 @@ private:
     String m_text;
     bool m_needsUpdate;
 };
+
+#endif

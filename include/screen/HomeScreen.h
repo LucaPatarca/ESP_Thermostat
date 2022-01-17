@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NO_DISPLAY
+
 #include <screen/components.h>
 #include <state.h>
 
@@ -21,3 +23,5 @@ public:
     void draw() override;
     void refresh() override;
 };
+
+#endif

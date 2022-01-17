@@ -1,3 +1,7 @@
+#pragma once
+
+#ifndef NO_DISPLAY
+
 #include <screen/screen.h>
 #include <listeners.h>
 
@@ -10,3 +14,5 @@ public:
     void draw() override;
     void refresh() override;
 };
+
+#endif

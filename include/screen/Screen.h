@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NO_DISPLAY
+
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/FreeSans12pt7b.h>
@@ -43,3 +45,5 @@ public:
     void draw() override;
     virtual void tickImpl() = 0;
 };
+
+#endif

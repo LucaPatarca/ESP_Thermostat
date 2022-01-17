@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/components.h>
 #include <screen/icons.h>
 #include <state.h>
@@ -134,3 +136,5 @@ void WifiIcon::tickImpl()
 {
     m_animStatus = (m_animStatus + 1) % 2;
 }
+
+#endif

@@ -1,3 +1,7 @@
+#pragma once
+
+#ifndef NO_DISPLAY
+
 #include <screen/components.h>
 
 class TimeScreen: public Screen
@@ -15,3 +19,5 @@ public:
     void draw() override;
     void refresh() override;
 };
+
+#endif

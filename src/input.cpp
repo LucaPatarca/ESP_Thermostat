@@ -1,4 +1,4 @@
-#ifndef NO_PHISICAL_INPUT
+#ifndef NO_BUTTON_INPUT
 
 #include <input.h>
 #include <Arduino.h>

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NO_DISPLAY
+
 #include<screen/screen.h>
 
 class BoilerState: public ScreenElement{
@@ -43,3 +45,5 @@ class WifiIcon : public AnimatedScreenElement{
     void drawImpl() override;
     void tickImpl() override;
 };
+
+#endif

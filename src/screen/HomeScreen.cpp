@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/HomeScreen.h>
 
 HomeScreen::HomeScreen(Adafruit_SSD1306 &display) 
@@ -50,3 +52,5 @@ void HomeScreen::refresh(){
     m_boilerState.refresh();
     m_tempTrend.refresh();
 }
+
+#endif

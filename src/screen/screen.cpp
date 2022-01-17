@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/screen.h>
 
 Screen::Screen(Adafruit_SSD1306 &display)
@@ -54,3 +56,5 @@ void ScreenElement::draw()
 void ScreenElement::refresh(){
     m_needUpdate = true;
 }
+
+#endif

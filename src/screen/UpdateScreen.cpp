@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/UpdateScreen.h>
 #include <listeners.h>
 
@@ -45,3 +47,5 @@ void UpdateScreen::refresh()
 {
     //nothing to do here
 }
+
+#endif

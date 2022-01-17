@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/TimeScreen.h>
 
 TimeScreen::TimeScreen(Adafruit_SSD1306 &display) 
@@ -30,3 +32,5 @@ void TimeScreen::refresh()
     m_wifiIcon.refresh();
     m_thermoMode.refresh();
 }
+
+#endif

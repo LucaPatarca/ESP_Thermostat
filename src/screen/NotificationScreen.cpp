@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <screen/NotificationScreen.h>
 
 void NotificationScreen::setText(const String &text)
@@ -22,3 +24,5 @@ void NotificationScreen::refresh()
 {
     m_needsUpdate = true;
 }
+
+#endif
