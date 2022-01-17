@@ -1,12 +1,14 @@
 #include <state.h>
 #include <sdebug.h>
 
+#if LOG_LEVEL > LOG_LEVEL_OFF
+const char *thermostatModeNames[] = {"OFF", "ON", "PROGRAM"};
+const char *tempTrendNames[] = {"STABLE", "DROP", "RISE"};
+const char *wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING"};
+#endif
+
 #define UTC_OFFSET 3600
 #define UPDATE_INTERVAL 1800000  //update every 30 minutes
-
-const char *State::thermostatModeNames[] = {"OFF", "ON", "PROGRAM"};
-const char *State::tempTrendNames[] = {"STABLE", "DROP", "RISE"};
-const char *State::wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING"};
 
 State::State()
     : m_boilerState(false),

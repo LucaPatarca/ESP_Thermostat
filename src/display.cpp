@@ -1,3 +1,5 @@
+#ifndef NO_DISPLAY
+
 #include <display.h>
 #include <Wire.h>
 #include <sdebug.h>
@@ -102,3 +104,5 @@ void DisplayController::handle()
 
     m_display.display();
 }
+
+#endif

@@ -58,7 +58,7 @@ void OTAController::connect()
 {
     INFO("ota connecting...");
     ArduinoOTA.begin();
-    INFO("ota connected");
+    INFO("ota connected.");
 }
 
 void OTAController::handle()

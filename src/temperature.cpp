@@ -81,7 +81,7 @@ void TemperatureController::handle()
         float coefficient = computeCoefficient();
         m_lastTrend = computeTrend();
 
-        INFO("setting temperature temp: %.3f trend: %s coefficient: %.3f humidity: %.3f", m_smoothTemp, State::Instance().tempTrendNames[m_lastTrend], coefficient, humidity);
+        INFO("setting temperature temp: %.3f trend: %s coefficient: %.3f humidity: %.3f", m_smoothTemp, tempTrendNames[m_lastTrend], coefficient, humidity);
 
         State::Instance().setCurrentTemperature(Temperature_t{m_smoothTemp, humidity, m_lastTrend, coefficient});
 

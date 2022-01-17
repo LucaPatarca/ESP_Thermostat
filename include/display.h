@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NO_DISPLAY
+
 #include <Adafruit_SSD1306.h>
 #include <temperature.h>
 #include <screen/HomeScreen.h>
@@ -47,3 +49,8 @@ private:
 
     DisplayController();
 };
+
+#define IF_DISPLAY_ENABLED(...) __VA_ARGS__
+#else
+#define IF_DISPLAY_ENABLED(...)
+#endif

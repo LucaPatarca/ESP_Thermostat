@@ -21,14 +21,14 @@ float ProgramController::getTemperature(int day, int time)
 
 void ProgramController::putTemperature(int day, int time, float temp)
 {
-    unsigned char value;
+    uint8_t value;
     if (temp < 10)
     {
         value = 0;
     }
     else
     {
-        value = static_cast<unsigned char>((temp - 10) * 10);
+        value = static_cast<uint8_t>((temp - 10) * 10);
     }
     FINE("putting %d to %d - %d\n", value, day, time);
     _program.days[day].temps[time] = value;

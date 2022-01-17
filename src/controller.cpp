@@ -3,13 +3,13 @@
 
 MainController::MainController()
     : m_thermostat(BoilerController::Instance()),
-    m_display(DisplayController::Instance()),
+    IF_DISPLAY_ENABLED(m_display(DisplayController::Instance()),)
     m_alexa(AlexaController::Instance()),
     m_ota(OTAController::Instance()),
     m_temperature(TemperatureController::Instance()),
     m_wifi(WifiController::Instance()),
     m_program(ProgramController::Instance()),
-    m_input(InputController::Instance()),
+    IF_INPUT_ENABLED(m_input(InputController::Instance()),)
     m_state(State::Instance())
 {
     m_state.addListener(this);
@@ -28,14 +28,14 @@ void MainController::handle()
     m_ota.handle();
     m_temperature.handle();
     m_program.handle();
-    m_input.handle();
-    m_display.handle();
+    IF_INPUT_ENABLED(m_input.handle();)
+    IF_DISPLAY_ENABLED(m_display.handle();)
 }
 
 void MainController::targetTemperatureChanged(Cause cause)
 {
     FINE("notify target temperature changed");
-    m_display.targetTemperatureChanged(cause);
+    IF_DISPLAY_ENABLED(m_display.targetTemperatureChanged(cause);)
     m_alexa.targetTemperatureChanged(cause);
     m_thermostat.targetTemperatureChanged();
 }
@@ -43,7 +43,7 @@ void MainController::targetTemperatureChanged(Cause cause)
 void MainController::powerStateChanged(Cause cause)
 {
     FINE("notify power state changed");
-    m_display.powerStateChanged();
+    IF_DISPLAY_ENABLED(m_display.powerStateChanged();)
     m_alexa.powerStateChanged(cause);
     m_thermostat.powerStateChanged();
 }
@@ -51,7 +51,7 @@ void MainController::powerStateChanged(Cause cause)
 void MainController::thermostatModeChanged(Cause cause)
 {
     FINE("notify thermostat mode changed");
-    m_display.thermostatModeChanged(cause);
+    IF_DISPLAY_ENABLED(m_display.thermostatModeChanged(cause);)
     m_alexa.thermostatModeChanged(cause);
     m_program.thermostatModeChanged();
 }
@@ -59,13 +59,13 @@ void MainController::thermostatModeChanged(Cause cause)
 void MainController::boilerStateChanged()
 {
     FINE("notify boiler state changed");
-    m_display.boilerStateChanged();
+    IF_DISPLAY_ENABLED(m_display.boilerStateChanged();)
 }
 
 void MainController::currentTemperatureChanged()
 {
     FINE("notify current temperature changed");
-    m_display.currentTemperatureChanged();
+    IF_DISPLAY_ENABLED(m_display.currentTemperatureChanged();)
     m_alexa.currentTemperatureChanged();
     m_thermostat.currentTemperatureChanged();
 }
@@ -73,7 +73,7 @@ void MainController::currentTemperatureChanged()
 void MainController::wifiStatusChanged()
 {
     FINE("notify wifi status changed");
-    m_display.wifiStatusChanged();
+    IF_DISPLAY_ENABLED(m_display.wifiStatusChanged();)
     m_alexa.wifiStatusChanged();
     m_ota.wifiStatusChanged();
 }
@@ -88,6 +88,6 @@ void MainController::onUpdateEvent(const UpdateEvent_t& event)
 {
     FINE("notify update event");
     m_alexa.onUpdateEvent(event);
-    m_display.onUpdateEvent(event);
+    IF_DISPLAY_ENABLED(m_display.onUpdateEvent(event);)
 }
 

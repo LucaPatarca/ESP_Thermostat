@@ -1,54 +1,43 @@
-#ifdef ENABLE_LOG
+#ifdef ENABLE_REMOTE_LOGGING
 
 #include <logger.h>
+#include <state.h>
+#include <sdebug.h>
 
-void Logger::_sendLog()
+RemoteLogger::RemoteLogger() {}
+
+void RemoteLogger::sendLog()
 {
-    _http.begin(_client, "http://192.168.5.99:9000/log/");
-    _http.addHeader("Content-Type", "application/json");
+    if (!m_http.begin(m_client, "http://192.168.5.99:9000/log/"))
+    {
+        ERROR("cannot initialize http client");
+        return;
+    }
+    State &state = State::Instance();
+    m_http.addHeader("Content-Type", "application/json");
     char json[512];
     String s[] = {"D", "R", "S"};
     sprintf(json, "{\"temp\":%.2f,\"humidity\":%.2f,\"trend\":\"%s\",\"coeff\":%.4f,\"power\":%s,\"target\":%.2f,\"boiler\":%s}",
-            _temp.temp,
-            _temp.humidity,
-            s[_temp.trend].c_str(),
-            _temp.coefficient,
-            _power ? "true" : "false",
-            _target,
-            _boiler ? "true" : "false");
-#ifdef LOGGER_DEBUG
-    Serial.printf("[Logger] sending: \n%s\n", json);
-#endif
-    _http.POST(json);
-}
-
-void Logger::onBoilerState(bool state)
-{
-    _boiler = state;
-}
-
-void Logger::onCurrentTemperature(Temperature temp)
-{
-    _temp = temp;
-    _sendLog();
-}
-
-void Logger::onPowerState(bool state)
-{
-    _power = state;
-}
-
-void Logger::onTargetTemperature(float temp)
-{
-    _target = temp;
-}
-
-void Logger::onThermostatMode(Mode mode){
-    
-}
-
-void Logger::onSetSetting(String key, String value){
-    //nop
+            state.getCurrentTemperature().temp,
+            state.getCurrentTemperature().humidity,
+            s[state.getCurrentTemperature().trend].c_str(),
+            state.getCurrentTemperature().coefficient,
+            state.getPowerState() ? "true" : "false",
+            state.getTargetTemperature(),
+            state.getBoilerState() ? "true" : "false");
+    int code = m_http.POST(json);
+    if (code == 200)
+    {
+        INFO("remote logger sent: %s", json);
+    }
+    else if (code > 0)
+    {
+        WARN("server responded with not ok code: %d", code);
+    }
+    else
+    {
+        ERROR("cannot send to server: %d", code);
+    }
 }
 
 #endif

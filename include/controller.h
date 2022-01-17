@@ -33,13 +33,13 @@ public:
 
 private:
     BoilerController &m_thermostat;
-    DisplayController &m_display;
+    IF_DISPLAY_ENABLED(DisplayController &m_display;)
     AlexaController &m_alexa;
     OTAController &m_ota;
     TemperatureController &m_temperature;
     WifiController &m_wifi;
     ProgramController &m_program;
-    InputController &m_input;
+    IF_INPUT_ENABLED(InputController &m_input;)
     State &m_state;
 
     MainController();

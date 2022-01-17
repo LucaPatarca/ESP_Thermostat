@@ -19,4 +19,8 @@ public:
 
     void handle();
 };
+
+#define IF_INPUT_ENABLED(...) __VA_ARGS__
+#else
+#define IF_INPUT_ENABLED(...)
 #endif

@@ -1,5 +1,6 @@
 #include <boiler.h>
 #include <sdebug.h>
+#include <logger.h>
 
 #define TEMP_RANGE_LOW 1
 #define TEMP_RANGE_HIGH 0.3
@@ -50,6 +51,7 @@ void BoilerController::compute()
     default:
         break;
     }
+    SEND_REMOTE_LOG;
 }
 
 TCase BoilerController::getTempCase()

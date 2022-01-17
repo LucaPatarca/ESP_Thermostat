@@ -78,10 +78,6 @@ public:
 
     void addListener(StateListener*);
 
-    static const char *thermostatModeNames[];
-    static const char *tempTrendNames[];
-    static const char *wifiStatusNames[];
-
 private:
     bool m_boilerState;
     float m_targetTemperature;

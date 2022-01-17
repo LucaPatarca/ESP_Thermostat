@@ -19,7 +19,7 @@ void UpdateScreen::onUpdateEvent(const UpdateEvent_t& event)
         m_display.drawRect(14, 42, 100, 12, WHITE);
         break;
     case UpdateEventType::PROGRESS:
-        m_display.fillRect(14, 42, (int)event.progress, 12, WHITE);
+        m_display.fillRect(14, 42, static_cast<int>(event.progress), 12, WHITE);
         break;
     case UpdateEventType::END:
         m_display.clearDisplay();
