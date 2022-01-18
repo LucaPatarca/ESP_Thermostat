@@ -12,7 +12,7 @@ ESP_Thermostat is a full-featured Smart Thermostat created using an ESP8266 boar
 
 #### Smart Home Integration
 
-ESP_Thermostat is compatible with most smart assistants like Alexa and Google Home. To do so, it uses a modified version of the SinricPro SDK, for more info visit their GitHub page [here](https://github.com/sinricpro/esp8266-esp32-sdk).
+ESP_Thermostat is compatible with most smart assistants like Alexa and Google Home.
 
 #### Schedule
 
