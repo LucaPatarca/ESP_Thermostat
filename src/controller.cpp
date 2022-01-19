@@ -4,7 +4,7 @@
 MainController::MainController()
     : m_thermostat(BoilerController::Instance()),
     IF_DISPLAY_ENABLED(m_display(DisplayController::Instance()),)
-    m_alexa(AlexaController::Instance()),
+    m_alexa(*new AlexaController()),
     m_ota(OTAController::Instance()),
     m_temperature(TemperatureController::Instance()),
     m_wifi(WifiController::Instance()),
@@ -19,7 +19,7 @@ MainController::MainController()
 void MainController::setup()
 {
     m_wifi.connect();
-    m_ota.setOnUpdateEvent([this](const UpdateEvent_t& event){onUpdateEvent(event);});
+    m_ota.setOnUpdateEvent([this](const UpdateEvent_t& event){ onUpdateEvent(event); });
 }
 
 void MainController::handle()

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <listeners.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include <listeners.h>
 
 enum Mode
 {
@@ -77,6 +77,7 @@ public:
     String getFormattedTime();
 
     void addListener(StateListener*);
+    void reset();
 
 private:
     bool m_boilerState;

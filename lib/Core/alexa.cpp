@@ -13,9 +13,13 @@
 #define TEMP_UPDATE_THRESHOLD 0.2f
 #define HUMIDITY_UPDATE_THRESHOLD 3
 
+AlexaController* AlexaController::m_instance = nullptr;
+
 AlexaController::AlexaController()
     : m_state(State::Instance())
 {
+    if(m_instance) { ERROR("Alexa controller already exists"); }
+    m_instance = this;
 }
 
 void AlexaController::connect()

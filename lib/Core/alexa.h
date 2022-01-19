@@ -8,12 +8,10 @@
 class AlexaController
 {
 public:
+    AlexaController();
     AlexaController(const AlexaController&) = delete;
 
-    static AlexaController& Instance(){
-        static AlexaController alexa;
-        return alexa;
-    }
+    static AlexaController& Instance(){ return *m_instance; }
 
     void targetTemperatureChanged(Cause);
     void powerStateChanged(Cause);
@@ -40,5 +38,5 @@ private:
     bool onPowerState(const String &, bool &);
     bool onSetSetting(const String &, const String &, String &);
 
-    AlexaController();
+    static AlexaController *m_instance;
 };

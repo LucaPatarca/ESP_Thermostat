@@ -6,8 +6,6 @@
 #define LOG_LEVEL_INFO 3
 #define LOG_LEVEL_FINE 4
 
-#define LOG_LEVEL LOG_LEVEL_INFO
-
 #if LOG_LEVEL > LOG_LEVEL_OFF
 #define LOG(severity, ...) Serial.printf("% 9.3fs [%s]  %15s  : ", millis()/1000.0f, severity, __FILE__);\
     Serial.printf(__VA_ARGS__);\

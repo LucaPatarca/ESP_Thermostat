@@ -130,3 +130,13 @@ void State::addListener(StateListener* listener)
 {
     m_listener = listener;
 }
+
+void State::reset()
+{
+    m_boilerState = false;
+    m_targetTemperature = 0.0;
+    m_powerState = false;
+    m_thermostatMode = Mode::OFF;
+    m_currentTemperature = Temperature_t{0,0,TemperatureTrend::STABLE,0};
+    m_wifiStatus = WiFiStatus::DISCONNECTED;
+}
