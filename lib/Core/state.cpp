@@ -1,10 +1,11 @@
 #include <state.h>
 #include <sdebug.h>
+#include <ESP_EEPROM.h>
 
 #if LOG_LEVEL > LOG_LEVEL_OFF
 const char *thermostatModeNames[] = {"OFF", "ON", "PROGRAM"};
 const char *tempTrendNames[] = {"STABLE", "DROP", "RISE"};
-const char *wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING"};
+const char *wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING", "CONNECTED_NO_INTERNET"};
 #endif
 
 #define UTC_OFFSET 3600
@@ -19,6 +20,9 @@ State::State()
     m_wifiStatus(WiFiStatus::DISCONNECTED),
     m_client(NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET, UPDATE_INTERVAL))
 {
+    INFO("EEPROM.begin(%d)", sizeof(Config_t));
+    EEPROM.begin(sizeof(Config_t));
+    loadConfig();
     m_client.begin();
 }
 
@@ -80,6 +84,37 @@ void State::setwWifiStatus(WiFiStatus status)
     m_wifiStatus = status;
     m_listener->wifiStatusChanged();
 }
+    
+bool State::setProgram(const WeekProgram_t& program)
+{
+    m_config.program = program;
+    return saveConfig();
+}
+
+void State::setWifiCredentials(const char *SSID, const char *pass)
+{
+    size_t ssid_len = strlen(SSID);
+    size_t pass_len = strlen(pass);
+    if(ssid_len > 64 || pass_len > 64) return;
+    strcpy(m_config.wifiSSID, SSID);
+    strcpy(m_config.wifiPASS, pass);
+    m_config.wifiSet = true;
+    saveConfig();
+}
+
+void State::setApiCredentials(const char *apiKey, const char *apiSecret, const char *apiDeviceID)
+{
+    size_t key_len = strlen(apiKey);
+    size_t secret_len = strlen(apiSecret);
+    size_t id_len = strlen(apiDeviceID);
+    if(key_len > 64 || secret_len > 128 || id_len > 32) return;
+    strcpy(m_config.apiKey, apiKey);
+    strcpy(m_config.apiSecret, apiSecret);
+    strcpy(m_config.apiDeviceID, apiDeviceID);
+    m_config.apiSet = true;
+    saveConfig();
+}
+
 
 bool State::getBoilerState() const
 {
@@ -125,6 +160,11 @@ String State::getFormattedTime()
 {
     return m_client.getFormattedTime();
 }
+
+Config_t& State::getConfig()
+{
+    return m_config;
+}
     
 void State::addListener(StateListener* listener)
 {
@@ -139,4 +179,21 @@ void State::reset()
     m_thermostatMode = Mode::OFF;
     m_currentTemperature = Temperature_t{0,0,TemperatureTrend::STABLE,0};
     m_wifiStatus = WiFiStatus::DISCONNECTED;
+}
+
+void State::loadConfig()
+{
+    m_config = EEPROM.get(0, m_config);
+}
+
+bool State::saveConfig()
+{
+    m_config = EEPROM.put(0, m_config);
+    bool result = EEPROM.commit();
+    if(!result)
+    {
+        ERROR("cannot save config");
+    }
+    return result;
+    //TODO may be i need to call loadConfig() after
 }

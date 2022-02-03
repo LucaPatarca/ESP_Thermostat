@@ -3,14 +3,6 @@
 #include <state.h>
 
 typedef struct {
-    unsigned char temps[48];
-} DayProgram_t;
-
-typedef struct {
-    DayProgram_t days[7];
-} WeekProgram_t;
-
-typedef struct {
     int days[7];
     int fromTime;
     int toTime;
@@ -21,14 +13,13 @@ class ProgramController
 {
 private:
     State &m_state;
-    WeekProgram_t _program;
+    WeekProgram_t& m_program;
     int m_lastDay;
     int m_lastTime;
 
     float getTemperature(int, int);
     void putTemperature(int, int, float);
 
-    void loadProgram();
     bool saveProgram();
 
     int parseChange(ScheduleChange_t&, String &value);

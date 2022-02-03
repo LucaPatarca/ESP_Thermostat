@@ -10,8 +10,6 @@
 #include <screen/NotificationScreen.h>
 #include <listeners.h>
 
-//TODO optimize object parameters by moving instead of copying (when possible)
-
 class DisplayController
 {
 public:

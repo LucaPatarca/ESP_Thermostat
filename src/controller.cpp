@@ -28,6 +28,7 @@ void MainController::handle()
     m_ota.handle();
     m_temperature.handle();
     m_program.handle();
+    m_wifi.handle();
     IF_INPUT_ENABLED(m_input.handle();)
     IF_DISPLAY_ENABLED(m_display.handle();)
 }

@@ -24,8 +24,9 @@ AlexaController::AlexaController()
 
 void AlexaController::connect()
 {
+    if(!m_state.getConfig().apiSet) return;
     INFO("alexa connecting...");
-    SinricProThermostat &local = SinricPro[THERMOSTAT_ID];
+    SinricProThermostat &local = SinricPro[m_state.getConfig().apiDeviceID];
     local.onPowerState([this](const String &device, bool &mode)
                        { return this->onPowerState(device, mode); });
     local.onTargetTemperature([this](const String &device, float &temp)
@@ -44,7 +45,7 @@ void AlexaController::connect()
                              { INFO("alexa disconnected from SinricPro."); });
 
     SinricPro.restoreDeviceStates(true);
-    SinricPro.begin(APP_KEY, APP_SECRET);
+    SinricPro.begin(m_state.getConfig().apiKey, m_state.getConfig().apiSecret);
 
     m_device = &local;
 }
@@ -109,7 +110,7 @@ void AlexaController::targetTemperatureChanged(Cause cause)
 {
     if (cause == Cause::ALEXA)
         return;
-    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
+    if (SinricPro.isConnected())
     {
         INFO("sending target temperature to device");
         m_device->sendTargetTemperatureEvent(m_state.getTargetTemperature());
@@ -120,7 +121,7 @@ void AlexaController::powerStateChanged(Cause cause)
 {
     if (cause == Cause::ALEXA)
         return;
-    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
+    if (SinricPro.isConnected())
     {
         INFO("sending power state to device");
         m_device->sendPowerStateEvent(m_state.getPowerState());
@@ -138,7 +139,7 @@ void AlexaController::onUpdateEvent(const UpdateEvent_t& event)
 
 void AlexaController::currentTemperatureChanged()
 {
-    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
+    if (SinricPro.isConnected())
     {
         auto temp = m_state.getCurrentTemperature();
         if (temp.temp - m_lastSentTemp > TEMP_UPDATE_THRESHOLD ||
@@ -158,7 +159,7 @@ void AlexaController::thermostatModeChanged(Cause cause)
 {
     if (cause == Cause::ALEXA)
         return;
-    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
+    if (SinricPro.isConnected())
     {
         INFO("sending thermostat mode to device");
         switch (m_state.getThermostatMode())

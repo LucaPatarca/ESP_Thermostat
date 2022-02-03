@@ -14,7 +14,8 @@ TemperatureController::TemperatureController()
     : m_sensor(DHT(SENSOR_PIN, DHT22)),
       m_lastTrend(TemperatureTrend::STABLE)
 {
-    m_sensor.begin();
+    m_sensor.begin(100);
+    delay(200);
 }
 
 TemperatureTrend TemperatureController::computeTrend()
@@ -73,7 +74,9 @@ void TemperatureController::handle()
 {
     if (millis() > m_updateTime)
     {
-        m_smoothTemp = smoothe(m_sensor.readTemperature(), m_smoothTemp);
+        float temp = m_sensor.readTemperature();
+        if(isnan(temp)) return;
+        m_smoothTemp = smoothe(temp, m_smoothTemp);
         if (m_lastTemp == 0)
             m_lastTemp = m_smoothTemp;
         float humidity = m_sensor.readHumidity();

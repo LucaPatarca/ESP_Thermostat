@@ -38,6 +38,7 @@ enum WiFiStatus
     DISCONNECTED,
     CONNECTED,
     CONNECTING,
+    CONNECTED_NO_INTERNET,
 };
 
 typedef struct Time{
@@ -48,6 +49,25 @@ typedef struct Time{
         return this->hour != rhs.hour && this->minutes != rhs.minutes && this->day != rhs.day;
     }
 } Time_t;
+
+typedef struct {
+    unsigned char temps[48];
+} DayProgram_t;
+
+typedef struct {
+    DayProgram_t days[7];
+} WeekProgram_t;
+
+typedef struct {
+    bool wifiSet;
+    char wifiSSID[64];
+    char wifiPASS[64];
+    bool apiSet;
+    char apiKey[64];
+    char apiSecret[128];
+    char apiDeviceID[32];
+    WeekProgram_t program;
+} Config_t;
 
 class State
 {
@@ -65,6 +85,9 @@ public:
     void setThermostatMode(Cause, Mode);
     void setCurrentTemperature(const Temperature_t&);
     void setwWifiStatus(WiFiStatus);
+    bool setProgram(const WeekProgram_t&);
+    void setWifiCredentials(const char *SSID, const char *pass);
+    void setApiCredentials(const char *apiKey, const char *apiSecret, const char *apiDeviceID);
 
     bool getBoilerState() const;
     float getTargetTemperature() const;
@@ -72,9 +95,9 @@ public:
     Mode getThermostatMode() const;
     const Temperature_t& getCurrentTemperature() const;
     WiFiStatus getWifiStatus() const;
-
     Time_t getTime();
     String getFormattedTime();
+    Config_t& getConfig();
 
     void addListener(StateListener*);
     void reset();
@@ -86,11 +109,15 @@ private:
     Mode m_thermostatMode;
     Temperature_t m_currentTemperature;
     WiFiStatus m_wifiStatus;
+    Config_t m_config;
 
     WiFiUDP m_udp;
     NTPClient m_client;
 
     StateListener *m_listener;
+
+    void loadConfig();
+    bool saveConfig();
 
     State();
 };

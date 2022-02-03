@@ -15,8 +15,6 @@ enum TCase
     ABOVE_TARGET
 };
 
-//TODO it may be useful to make this class an UpdateListener so that it can turn off the boiler during updates
-
 class BoilerController
 {
 private:

@@ -1,21 +1,18 @@
 #include <program.h>
-#include <ESP_EEPROM.h>
 #include <ArduinoJson.h>
 #include <sdebug.h>
 
 ProgramController::ProgramController()
     : m_state(State::Instance()),
-    m_lastDay(-1),
-    m_lastTime(-1)
+      m_program(m_state.getConfig().program),
+      m_lastDay(-1),
+      m_lastTime(-1)
 {
-    INFO("EEPROM.begin(%d)", sizeof(WeekProgram_t));
-    EEPROM.begin(sizeof(WeekProgram_t));
-    loadProgram();
 }
 
 float ProgramController::getTemperature(int day, int time)
 {
-    float temp = (_program.days[day].temps[time] / 10) + 10;
+    float temp = (m_program.days[day].temps[time] / 10) + 10;
     return temp <= 10 ? 0 : temp;
 }
 
@@ -31,35 +28,28 @@ void ProgramController::putTemperature(int day, int time, float temp)
         value = static_cast<uint8_t>((temp - 10) * 10);
     }
     FINE("putting %d to %d - %d\n", value, day, time);
-    _program.days[day].temps[time] = value;
-}
-
-void ProgramController::loadProgram()
-{
-    INFO("loading program");
-    _program = EEPROM.get(0, _program);
+    m_program.days[day].temps[time] = value;
 }
 
 bool ProgramController::saveProgram()
 {
     INFO("saving program");
-    EEPROM.put(0, _program);
-    return EEPROM.commit();
+    return m_state.setProgram(m_program);
 }
 
 void ProgramController::applyProgram()
 {
     INFO("applying program");
     float target = getTemperature(m_lastDay, m_lastTime);
-        if (target > 0)
-        {
-            m_state.setTargetTemperature(Cause::SCHEDULE, target);
-            m_state.setPowerState(Cause::SCHEDULE, true);
-        }
-        else
-        {
-            m_state.setPowerState(Cause::SCHEDULE, false);
-        }
+    if (target > 0)
+    {
+        m_state.setTargetTemperature(Cause::SCHEDULE, target);
+        m_state.setPowerState(Cause::SCHEDULE, true);
+    }
+    else
+    {
+        m_state.setPowerState(Cause::SCHEDULE, false);
+    }
 
 //logged at level FINE
 #if LOG_LEVEL > LOG_LEVEL_INFO
@@ -81,7 +71,7 @@ void ProgramController::handle()
     if (m_state.getThermostatMode() == Mode::PROGRAM)
     {
         Time_t time = m_state.getTime();
-        int programTime = (time.hour*2)+(time.minutes>=30?1:0);
+        int programTime = (time.hour * 2) + (time.minutes >= 30 ? 1 : 0);
         if (programTime != m_lastTime || time.day != m_lastDay)
         {
             m_lastDay = time.day;
@@ -98,7 +88,7 @@ void ProgramController::thermostatModeChanged()
     m_lastTime = -1;
 }
 
-int ProgramController::parseChange(ScheduleChange_t& change, String &value)
+int ProgramController::parseChange(ScheduleChange_t &change, String &value)
 {
     DynamicJsonDocument doc(128);
     char *noCopy = (char *)value.c_str();
@@ -149,7 +139,6 @@ void ProgramController::addScheduleChange(const ScheduleChange_t &change)
     }
 
     saveProgram();
-    loadProgram();
     applyProgram();
 }
 
@@ -168,7 +157,6 @@ void ProgramController::removeScheduleChange(const ScheduleChange_t &change)
     }
 
     saveProgram();
-    loadProgram();
     applyProgram();
 }
 
@@ -178,14 +166,14 @@ void ProgramController::onSetSetting(const String &key, String &value)
     {
         ScheduleChange_t change;
         int error = parseChange(change, value);
-        if(!error)
+        if (!error)
             addScheduleChange(change);
     }
     else if (key == "ScheduleChangeRemove")
     {
         ScheduleChange_t change;
         int error = parseChange(change, value);
-        if(!error)
+        if (!error)
             removeScheduleChange(change);
     }
 }

@@ -41,7 +41,6 @@ typedef struct UpdateEvent
 {
     UpdateEventType type;
     float progress;
-    //TODO probably not ok
     const char *message;
 
     String toString() const {
