@@ -5,10 +5,18 @@
 #define TEMP_RANGE_LOW 1
 #define TEMP_RANGE_HIGH 0.3
 #define SAFE_TEMP 15
+#define BOILER_PIN D5
+#define ON 1
+#define OFF 2
+#define NONE 3
+#define CHANGE_DELAY 3000 // in milliseconds
 
 BoilerController::BoilerController()
-    : m_state(State::Instance())
+    : m_state(State::Instance()),
+      m_lastChange(300000)
 {
+    pinMode(BOILER_PIN, OUTPUT);
+    digitalWrite(BOILER_PIN, LOW);
 }
 
 void BoilerController::currentTemperatureChanged()
@@ -26,6 +34,15 @@ void BoilerController::targetTemperatureChanged()
     compute();
 }
 
+void BoilerController::setBoilerState(bool value)
+{
+    m_toSet = value ? ON : OFF;
+    if (millis() > m_lastChange)
+    {
+        m_lastChange = millis();
+    }
+}
+
 void BoilerController::compute()
 {
     FINE("computing...");
@@ -36,16 +53,14 @@ void BoilerController::compute()
     case TCase::BELOW_LOW_RANGE:
     case TCase::BELOW_RANGE_HIGH_NOT_RISING:
     case TCase::BELOW_TARGET_DROPPING:
-        INFO("setting boiler on");
-        m_state.setBoilerState(true);
+        setBoilerState(true);
         break;
 
     case TCase::OFF_ABOVE_SAFE_RANGE:
     case TCase::BELOW_RANGE_HIGH_RISING:
     case TCase::BELOW_TARGET_NOT_DROPPING:
     case TCase::ABOVE_TARGET:
-        INFO("setting boiler off");
-        m_state.setBoilerState(false);
+        setBoilerState(false);
         break;
 
     default:
@@ -100,5 +115,16 @@ TCase BoilerController::getTempCase()
     else
     {
         return TCase::ABOVE_TARGET;
+    }
+}
+
+void BoilerController::handle()
+{
+    if (m_toSet != NONE && millis() > m_lastChange + CHANGE_DELAY)
+    {
+        INFO("setting boiler %s", m_toSet == ON ? "on" : "off");
+        m_state.setBoilerState(m_toSet == ON);
+        digitalWrite(BOILER_PIN, m_toSet == ON ? HIGH : LOW);
+        m_toSet = NONE;
     }
 }

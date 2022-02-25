@@ -2,7 +2,7 @@
 #include <sdebug.h>
 
 #define SMOOTH_FACTOR 4
-#define SENSOR_PIN D5
+#define SENSOR_PIN D3
 
 #define TEMP_EVENT_INTERVAL 60000 //in milliseconds
 #define STABLE_THRESHOLD 10

@@ -84,7 +84,7 @@ public:
     void setPowerState(Cause, bool);
     void setThermostatMode(Cause, Mode);
     void setCurrentTemperature(const Temperature_t&);
-    void setwWifiStatus(WiFiStatus);
+    void setWifiStatus(WiFiStatus);
     bool setProgram(const WeekProgram_t&);
     void setWifiCredentials(const char *SSID, const char *pass);
     void setApiCredentials(const char *apiKey, const char *apiSecret, const char *apiDeviceID);
@@ -101,6 +101,7 @@ public:
 
     void addListener(StateListener*);
     void reset();
+    void factoryReset();
 
 private:
     bool m_boilerState;

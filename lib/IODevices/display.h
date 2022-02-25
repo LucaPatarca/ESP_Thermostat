@@ -29,6 +29,7 @@ public:
 
     void onUpdateEvent(const UpdateEvent_t&);
 
+    void notify(const char*, uint32_t);
     void handle();
 private:
     Adafruit_SSD1306 m_display;
@@ -43,7 +44,6 @@ private:
     Screen *m_activeScreen;
 
     void _setActiveScreen(Screen *);
-    void _notify(const String&);
 
     DisplayController();
 };

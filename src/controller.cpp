@@ -29,6 +29,7 @@ void MainController::handle()
     m_temperature.handle();
     m_program.handle();
     m_wifi.handle();
+    m_thermostat.handle();
     IF_INPUT_ENABLED(m_input.handle();)
     IF_DISPLAY_ENABLED(m_display.handle();)
 }

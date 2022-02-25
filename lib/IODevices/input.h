@@ -5,8 +5,11 @@
 class InputController
 {
 private:
-    unsigned long _lastEventTime;
+    unsigned long m_lastEventTime;
     State &m_state;
+    uint32_t m_resetPressedCount;
+
+    void abortReset();
 
     InputController();
 public:

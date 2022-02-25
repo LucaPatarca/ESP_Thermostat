@@ -5,7 +5,6 @@
 #include <sdebug.h>
 
 #define SCREEN_INTERVAL         10000   //in milliseconds
-#define NOTIFICATION_INTERVAL   8000    //in milliseconds
 
 DisplayController::DisplayController()
     : m_display(Adafruit_SSD1306(128, 64, &Wire, -1)),
@@ -34,16 +33,6 @@ void DisplayController::_setActiveScreen(Screen *screen)
         m_activeScreen = screen;
         m_activeScreen->refresh();
     }
-    m_lastChange = millis();
-}
-
-void DisplayController::_notify(const String& text){
-    INFO("displayng notification %s", text.c_str());
-    m_changeInterval = NOTIFICATION_INTERVAL;
-    m_display.clearDisplay();
-    m_notificationScreen.setText(text);
-    m_activeScreen = &m_notificationScreen;
-    m_activeScreen->refresh();
     m_lastChange = millis();
 }
 
@@ -89,6 +78,17 @@ void DisplayController::thermostatModeChanged(Cause cause)
     m_timeScreen.thermostatModeChanged();
     if(cause == Cause::MANUAL)
         _setActiveScreen(&m_timeScreen);
+}
+
+void DisplayController::notify(const char* text, uint32_t seconds)
+{
+    FINE("displayng notification %s", text);
+    m_changeInterval = seconds*1000;
+    m_display.clearDisplay();
+    m_notificationScreen.setText(text);
+    m_activeScreen = &m_notificationScreen;
+    m_activeScreen->refresh();
+    m_lastChange = millis();
 }
 
 void DisplayController::handle()

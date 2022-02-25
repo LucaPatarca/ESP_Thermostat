@@ -77,7 +77,7 @@ void State::setCurrentTemperature(const Temperature_t &temp)
     m_listener->currentTemperatureChanged();
 }
 
-void State::setwWifiStatus(WiFiStatus status)
+void State::setWifiStatus(WiFiStatus status)
 {
     if(status == m_wifiStatus) return;
     INFO("wifi status is now %s", wifiStatusNames[status]);
@@ -179,6 +179,22 @@ void State::reset()
     m_thermostatMode = Mode::OFF;
     m_currentTemperature = Temperature_t{0,0,TemperatureTrend::STABLE,0};
     m_wifiStatus = WiFiStatus::DISCONNECTED;
+
+    m_config.apiSet = false;
+    m_config.wifiSet = false;
+    memset(m_config.wifiSSID, 0, 64);
+    memset(m_config.wifiPASS, 0, 64);
+    memset(m_config.apiKey, 0, 64);
+    memset(m_config.apiSecret, 0, 128);
+    memset(m_config.apiDeviceID, 0, 32);
+    memset(&m_config.program, 0, sizeof(WeekProgram_t));
+}
+
+void State::factoryReset()
+{
+    reset();
+    saveConfig();
+    ESP.reset();
 }
 
 void State::loadConfig()

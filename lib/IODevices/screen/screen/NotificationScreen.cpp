@@ -12,10 +12,20 @@ void NotificationScreen::draw()
 {
     if (m_needsUpdate)
     {
+        int y = 0;
+        if (m_text.length() > 25)
+        {
+            m_display.setFont(&FreeSans9pt7b);
+            y=12;
+        }
+        else
+        {
+            m_display.setFont(&FreeSans12pt7b);
+            y=18;
+        }
         m_display.setTextSize(1);
         m_display.setTextColor(WHITE, BLACK);
-        m_display.setCursor(0, 0);
-        m_display.setFont(&FreeSans12pt7b);
+        m_display.setCursor(0, y);
         m_display.printf("%s\n", m_text.c_str());
     }
 }

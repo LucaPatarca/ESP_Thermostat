@@ -21,6 +21,7 @@ private:
     WiFiUDP m_udp;
     ping_option m_options;
     ESP8266WebServer m_server;
+    String *m_token;
 
     void notifiStatus(WiFiStatus);
 
@@ -31,6 +32,8 @@ private:
 
     void onRecvWifiCredentials();
     void onRecvApiCredentials();
+
+    String* generateToken();
 
     WifiController();
 public:

@@ -203,19 +203,19 @@ namespace StateTest
     {
         test->reset();
         test->state.reset();
-        test->state.setwWifiStatus(WiFiStatus::CONNECTING);
+        test->state.setWifiStatus(WiFiStatus::CONNECTING);
         TEST_ASSERT_TRUE(test->wifiChanged);
         TEST_ASSERT_EQUAL(WiFiStatus::CONNECTING, test->state.getWifiStatus());
         test->reset();
-        test->state.setwWifiStatus(WiFiStatus::CONNECTING);
+        test->state.setWifiStatus(WiFiStatus::CONNECTING);
         TEST_ASSERT_FALSE(test->wifiChanged);
         TEST_ASSERT_EQUAL(WiFiStatus::CONNECTING, test->state.getWifiStatus());
         test->reset();
-        test->state.setwWifiStatus(WiFiStatus::CONNECTED);
+        test->state.setWifiStatus(WiFiStatus::CONNECTED);
         TEST_ASSERT_TRUE(test->wifiChanged);
         TEST_ASSERT_EQUAL(WiFiStatus::CONNECTED, test->state.getWifiStatus());
         test->reset();
-        test->state.setwWifiStatus(WiFiStatus::DISCONNECTED);
+        test->state.setWifiStatus(WiFiStatus::DISCONNECTED);
         TEST_ASSERT_TRUE(test->wifiChanged);
         TEST_ASSERT_EQUAL(WiFiStatus::DISCONNECTED, test->state.getWifiStatus());
     }

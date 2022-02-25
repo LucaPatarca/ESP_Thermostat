@@ -19,9 +19,12 @@ class BoilerController
 {
 private:
     State &m_state;
+    uint8_t m_toSet;
+    unsigned int m_lastChange;
 
     TCase getTempCase();
     void compute();
+    void setBoilerState(bool);
 
     BoilerController();
 
@@ -36,4 +39,6 @@ public:
     void currentTemperatureChanged();
     void powerStateChanged();
     void targetTemperatureChanged();
+
+    void handle();
 };
