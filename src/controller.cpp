@@ -1,5 +1,6 @@
 #include <controller.h>
 #include <sdebug.h>
+#include <logger.h>
 
 MainController::MainController()
     : m_thermostat(BoilerController::Instance()),
@@ -40,6 +41,7 @@ void MainController::targetTemperatureChanged(Cause cause)
     IF_DISPLAY_ENABLED(m_display.targetTemperatureChanged(cause);)
     m_alexa.targetTemperatureChanged(cause);
     m_thermostat.targetTemperatureChanged();
+    SEND_REMOTE_LOG();
 }
 
 void MainController::powerStateChanged(Cause cause)
@@ -48,6 +50,7 @@ void MainController::powerStateChanged(Cause cause)
     IF_DISPLAY_ENABLED(m_display.powerStateChanged();)
     m_alexa.powerStateChanged(cause);
     m_thermostat.powerStateChanged();
+    SEND_REMOTE_LOG();
 }
 
 void MainController::thermostatModeChanged(Cause cause)
@@ -56,12 +59,14 @@ void MainController::thermostatModeChanged(Cause cause)
     IF_DISPLAY_ENABLED(m_display.thermostatModeChanged(cause);)
     m_alexa.thermostatModeChanged(cause);
     m_program.thermostatModeChanged();
+    SEND_REMOTE_LOG();
 }
 
 void MainController::boilerStateChanged()
 {
     FINE("notify boiler state changed");
     IF_DISPLAY_ENABLED(m_display.boilerStateChanged();)
+    SEND_REMOTE_LOG();
 }
 
 void MainController::currentTemperatureChanged()
@@ -70,6 +75,7 @@ void MainController::currentTemperatureChanged()
     IF_DISPLAY_ENABLED(m_display.currentTemperatureChanged();)
     m_alexa.currentTemperatureChanged();
     m_thermostat.currentTemperatureChanged();
+    SEND_REMOTE_LOG();
 }
 
 void MainController::wifiStatusChanged()

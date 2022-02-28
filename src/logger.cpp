@@ -19,7 +19,7 @@ void RemoteLogger::sendLog()
     sprintf(json, "{\"temp\":%.2f,\"humidity\":%.2f,\"trend\":\"%s\",\"coeff\":%.4f,\"power\":%s,\"target\":%.2f,\"boiler\":%s}",
             state.getCurrentTemperature().temp,
             state.getCurrentTemperature().humidity,
-            tempTrendNames[state.getCurrentTemperature().trend][0],
+            tempTrendNames[state.getCurrentTemperature().trend],
             state.getCurrentTemperature().coefficient,
             state.getPowerState() ? "true" : "false",
             state.getTargetTemperature(),

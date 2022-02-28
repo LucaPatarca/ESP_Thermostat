@@ -23,7 +23,7 @@ public:
     void sendLog();
 };
 
-#define SEND_REMOTE_LOG RemoteLogger::Instance().sendLog()
+#define SEND_REMOTE_LOG() RemoteLogger::Instance().sendLog()
 
 #else
 #define SEND_REMOTE_LOG

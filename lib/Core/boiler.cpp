@@ -1,14 +1,13 @@
 #include <boiler.h>
 #include <sdebug.h>
-#include <logger.h>
 
 #define TEMP_RANGE_LOW 1
 #define TEMP_RANGE_HIGH 0.3
 #define SAFE_TEMP 15
 #define BOILER_PIN D5
+#define NONE 0
 #define ON 1
 #define OFF 2
-#define NONE 3
 #define CHANGE_DELAY 3000 // in milliseconds
 
 BoilerController::BoilerController()
@@ -66,7 +65,6 @@ void BoilerController::compute()
     default:
         break;
     }
-    SEND_REMOTE_LOG;
 }
 
 TCase BoilerController::getTempCase()
