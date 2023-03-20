@@ -211,5 +211,4 @@ bool State::saveConfig()
         ERROR("cannot save config");
     }
     return result;
-    //TODO may be i need to call loadConfig() after
 }

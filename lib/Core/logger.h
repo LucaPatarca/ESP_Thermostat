@@ -1,6 +1,7 @@
-#ifdef ENABLE_REMOTE_LOGGING
 
 #pragma once
+
+#ifdef ENABLE_REMOTE_LOGGING
 
 #include <ESP8266HTTPClient.h>
 
@@ -26,5 +27,5 @@ public:
 #define SEND_REMOTE_LOG() RemoteLogger::Instance().sendLog()
 
 #else
-#define SEND_REMOTE_LOG
+#define SEND_REMOTE_LOG()
 #endif
