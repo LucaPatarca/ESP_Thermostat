@@ -1,6 +1,8 @@
 #pragma once
 
 #ifdef ESP8266
+#include <Arduino.h>
+#include <Hash.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #endif

@@ -13,9 +13,7 @@ const char *wifiStatusNames[] = {"DISCONNECTED", "CONNECTED", "CONNECTING", "CON
 
 State::State()
     : m_boilerState(false),
-    m_targetTemperature(0.0),
     m_powerState(false),
-    m_thermostatMode(Mode::OFF),
     m_currentTemperature(Temperature_t{0,0,TemperatureTrend::STABLE,0}),
     m_wifiStatus(WiFiStatus::DISCONNECTED),
     m_client(NTPClient(m_udp, "pool.ntp.org", UTC_OFFSET, UPDATE_INTERVAL))
@@ -36,12 +34,13 @@ void State::setBoilerState(bool state)
 
 void State::setTargetTemperature(Cause cause, float temp)
 {
-    if(temp == m_targetTemperature) return;
-    m_targetTemperature = temp;
+    if(temp == m_config.targetTemp) return;
+    m_config.targetTemp = temp;
     INFO("target temp is now %.1f", temp);
     m_listener->targetTemperatureChanged(cause);
     if(cause != Cause::SCHEDULE)
         setThermostatMode(Cause::AUTO, Mode::ON);
+    saveConfig();
 }
 
 void State::setPowerState(Cause cause, bool state)
@@ -59,14 +58,15 @@ void State::setPowerState(Cause cause, bool state)
 
 void State::setThermostatMode(Cause cause, Mode mode)
 {
-    if(mode == m_thermostatMode) return;
-    m_thermostatMode = mode;
+    if(mode == m_config.mode) return;
+    m_config.mode = mode;
     INFO("thermostat mode is now %s", thermostatModeNames[mode]);
     m_listener->thermostatModeChanged(cause);
     if (mode != Mode::PROGRAM)
     {
         setPowerState(Cause::AUTO, mode == Mode::ON);
     }
+    saveConfig();
 }
 
 void State::setCurrentTemperature(const Temperature_t &temp)
@@ -104,14 +104,7 @@ void State::setWifiCredentials(const char *SSID, const char *pass)
 
 void State::setApiCredentials(const char *apiKey, const char *apiSecret, const char *apiDeviceID)
 {
-    size_t key_len = strlen(apiKey);
-    size_t secret_len = strlen(apiSecret);
-    size_t id_len = strlen(apiDeviceID);
-    if(key_len > 64 || secret_len > 128 || id_len > 32) return;
-    strcpy(m_config.apiKey, apiKey);
-    strcpy(m_config.apiSecret, apiSecret);
-    strcpy(m_config.apiDeviceID, apiDeviceID);
-    m_config.apiSet = true;
+    ERROR("Unimplemented");
     saveConfig();
 }
 
@@ -123,7 +116,7 @@ bool State::getBoilerState() const
 
 float State::getTargetTemperature() const
 {
-    return m_targetTemperature;
+    return m_config.targetTemp;
 }
 
 bool State::getPowerState() const
@@ -133,7 +126,7 @@ bool State::getPowerState() const
 
 Mode State::getThermostatMode() const
 {
-    return m_thermostatMode;
+    return m_config.mode;
 }
 
 const Temperature_t& State::getCurrentTemperature() const
@@ -174,19 +167,12 @@ void State::addListener(StateListener* listener)
 void State::reset()
 {
     m_boilerState = false;
-    m_targetTemperature = 0.0;
     m_powerState = false;
-    m_thermostatMode = Mode::OFF;
     m_currentTemperature = Temperature_t{0,0,TemperatureTrend::STABLE,0};
     m_wifiStatus = WiFiStatus::DISCONNECTED;
 
-    m_config.apiSet = false;
-    m_config.wifiSet = false;
-    memset(m_config.wifiSSID, 0, 64);
-    memset(m_config.wifiPASS, 0, 64);
-    memset(m_config.apiKey, 0, 64);
-    memset(m_config.apiSecret, 0, 128);
-    memset(m_config.apiDeviceID, 0, 32);
+    m_config.mode = Mode::OFF;
+    m_config.targetTemp = 20.0;
     memset(&m_config.program, 0, sizeof(WeekProgram_t));
 }
 
@@ -200,6 +186,15 @@ void State::factoryReset()
 void State::loadConfig()
 {
     m_config = EEPROM.get(0, m_config);
+    if(m_config.targetTemp < 1){
+        m_config.targetTemp = 20.0;
+        saveConfig();
+    }
+    if(m_config.mode == Mode::ON){
+        m_powerState = true;
+    } else if(m_config.mode == Mode::OFF){
+        m_powerState = false;
+    }
 }
 
 bool State::saveConfig()

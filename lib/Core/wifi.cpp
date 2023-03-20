@@ -174,7 +174,7 @@ void WifiController::connect()
         INFO("configuration mode");
         WiFi.softAP("ESP_Thermostat_config");
     }
-    if (!config.wifiSet || !config.apiSet)
+    if (!config.wifiSet)
     {
         m_server.begin();
         INFO("started http server");

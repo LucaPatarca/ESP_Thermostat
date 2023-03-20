@@ -12,7 +12,7 @@ public:
 enum Cause
 {
     NONE,
-    ALEXA,
+    REMOTE,
     MANUAL,
     SCHEDULE,
     AUTO

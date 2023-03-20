@@ -62,10 +62,8 @@ typedef struct {
     bool wifiSet;
     char wifiSSID[64];
     char wifiPASS[64];
-    bool apiSet;
-    char apiKey[64];
-    char apiSecret[128];
-    char apiDeviceID[32];
+    float targetTemp;
+    Mode mode;
     WeekProgram_t program;
 } Config_t;
 
@@ -105,9 +103,7 @@ public:
 
 private:
     bool m_boilerState;
-    float m_targetTemperature;
     bool m_powerState;
-    Mode m_thermostatMode;
     Temperature_t m_currentTemperature;
     WiFiStatus m_wifiStatus;
     Config_t m_config;
