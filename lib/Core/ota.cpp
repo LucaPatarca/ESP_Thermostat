@@ -46,14 +46,6 @@ OTAController::OTAController()
                        });
 }
 
-void OTAController::wifiStatusChanged()
-{
-    if (m_state.getWifiStatus() == WiFiStatus::CONNECTED)
-    {
-        connect();
-    }
-}
-
 void OTAController::connect()
 {
     INFO("ota connecting...");

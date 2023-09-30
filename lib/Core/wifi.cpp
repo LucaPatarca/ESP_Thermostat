@@ -1,16 +1,22 @@
 #include <wifi.h>
-#include <credentials.h>
 #include <sdebug.h>
 
 #define CHECK_INTERVAL 15000 // in milliseconds
+
+#define WIFI_SSID_ARG_NAME "SSID"
+#define WIFI_PASS_ARG_NAME "PASS"
+#define MQTT_SERVER_ARG_NAME "server"
+#define MQTT_PORT_ARG_NAME "port"
+#define MQTT_USER_ARG_NAME "user"
+#define MQTT_PASS_ARG_NAME "password"
 
 // TODO add emergency mode that should be used to set things like the time and the program (when there is no internet)
 //  evaluate if it's better to implement with udp broadcast using router or by making the thermostat a router (less elengant but safer)
 
 WifiController::WifiController()
 {
-    m_wifiConnectHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event)
-                                                   { this->onWiFiConnect(event); });
+    // m_wifiConnectHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event)
+    //                                                { this->onWiFiConnect(event); });
     m_wifiDisconnectHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected &event)
                                                              { this->onWiFiDisconnect(event); });
     memset(&m_options, 0, sizeof(struct ping_option));
@@ -21,8 +27,9 @@ WifiController::WifiController()
 
     m_server.on("/set-wifi", HTTP_POST, [this]()
                 { onRecvWifiCredentials(); });
-    m_server.on("/set-api", HTTP_POST, [this]()
-                { onRecvApiCredentials(); });
+    m_server.on("/set-mqtt", HTTP_POST, [this]()
+                { onRecvMQTTCredentials(); });
+    m_connected = false;
 }
 
 void WifiController::notifiStatus(WiFiStatus status)
@@ -50,7 +57,7 @@ void WifiController::onWiFiDisconnect(const WiFiEventStationModeDisconnected &ev
         return;
     }
     WiFi.disconnect();
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    WiFi.begin(State::Instance().getConfig().wifiSSID, State::Instance().getConfig().wifiPASS);
     if (!m_firstConnection)
     {
         notifiStatus(WiFiStatus::CONNECTING);
@@ -80,14 +87,14 @@ void WifiController::onPingReceive(void *opt, void *resp)
 
 void WifiController::onRecvWifiCredentials()
 {
-    if (!m_server.hasArg("SSID") || !m_server.hasArg("PASS"))
+    if (!m_server.hasArg(WIFI_SSID_ARG_NAME) || !m_server.hasArg("PASS"))
     {
         WARN("Invalid Request");
         m_server.send(400, "text/plain", "Invalid Request");
         return;
     }
     INFO("received wifi credentials");
-    String ssid = m_server.arg("SSID");
+    String ssid = m_server.arg(WIFI_SSID_ARG_NAME);
     String pass = m_server.arg("PASS");
     State::Instance().setWifiCredentials(ssid.c_str(), pass.c_str());
     m_token = generateToken();
@@ -99,7 +106,7 @@ void WifiController::onRecvWifiCredentials()
     connect();
 }
 
-void WifiController::onRecvApiCredentials()
+void WifiController::onRecvMQTTCredentials()
 {
     notifiStatus(WiFiStatus::CONNECTING);
     if (!m_server.hasHeader("Authorization") || m_token == nullptr)
@@ -108,7 +115,10 @@ void WifiController::onRecvApiCredentials()
         m_server.send(401, "text/plain", "Unauthorized");
         return;
     }
-    if (!m_server.hasArg("KEY") || !m_server.hasArg("SECRET") || !m_server.hasArg("DEVICEID"))
+    if (!m_server.hasArg(MQTT_SERVER_ARG_NAME) || 
+        !m_server.hasArg(MQTT_PORT_ARG_NAME) || 
+        !m_server.hasArg(MQTT_USER_ARG_NAME) || 
+        !m_server.hasArg(MQTT_PASS_ARG_NAME))
     {
         WARN("Invalid Request");
         m_server.send(400, "text/plain", "Invalid Request");
@@ -132,11 +142,12 @@ void WifiController::onRecvApiCredentials()
     }
     delete m_token;
     m_token = nullptr;
-    INFO("received api credentials");
-    String key = m_server.arg("KEY");
-    String secret = m_server.arg("SECRET");
-    String deviceID = m_server.arg("DEVICEID");
-    State::Instance().setApiCredentials(key.c_str(), secret.c_str(), deviceID.c_str());
+    INFO("received mqtt credentials");
+    String server = m_server.arg(MQTT_SERVER_ARG_NAME);
+    int port = m_server.arg(MQTT_PORT_ARG_NAME).toInt();
+    String user = m_server.arg(MQTT_USER_ARG_NAME);
+    String password = m_server.arg(MQTT_PASS_ARG_NAME);
+    State::Instance().setMQTTCredentials(server.c_str(), user.c_str(), password.c_str(), port);
     m_server.send(200, "text/plain", "Ok");
     delay(1000);
     notifiStatus(WiFiStatus::CONNECTED);
@@ -174,7 +185,7 @@ void WifiController::connect()
         INFO("configuration mode");
         WiFi.softAP("ESP_Thermostat_config");
     }
-    if (!config.wifiSet)
+    if (!config.wifiSet || config.mqttSet)
     {
         m_server.begin();
         INFO("started http server");
@@ -183,10 +194,16 @@ void WifiController::connect()
 
 void WifiController::handle()
 {
-    if (millis() > m_lastCheck + CHECK_INTERVAL)
-    {
-        ping_start(&m_options);
-        m_lastCheck = millis();
+    // if (millis() > m_lastCheck + CHECK_INTERVAL)
+    // {
+    //     ping_start(&m_options);
+    //     m_lastCheck = millis();
+    // }
+    if(WiFi.isConnected() != m_connected){
+        m_connected = WiFi.isConnected();
+        if(m_connected){
+            onWiFiConnect(WiFiEventStationModeGotIP());
+        }
     }
     m_server.handleClient();
 }

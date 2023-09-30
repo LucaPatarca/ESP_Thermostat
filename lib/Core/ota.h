@@ -15,7 +15,6 @@ private:
     std::function<void(const UpdateEvent_t&)> onUpdateEvent;
 
     OTAController();
-    void connect();
 public:
     OTAController(const OTAController&) = delete;
 
@@ -24,8 +23,7 @@ public:
         return controller;
     }
 
-    void wifiStatusChanged();
-
     void handle();
+    void connect();
     void setOnUpdateEvent(std::function<void(const UpdateEvent_t&)>);
 };

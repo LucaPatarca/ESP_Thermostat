@@ -62,6 +62,11 @@ typedef struct {
     bool wifiSet;
     char wifiSSID[64];
     char wifiPASS[64];
+    bool mqttSet;
+    char mqttServer[64];
+    char mqttUser[32];
+    char mqttPassword[128];
+    int mqttPort;
     float targetTemp;
     Mode mode;
     WeekProgram_t program;
@@ -85,7 +90,7 @@ public:
     void setWifiStatus(WiFiStatus);
     bool setProgram(const WeekProgram_t&);
     void setWifiCredentials(const char *SSID, const char *pass);
-    void setApiCredentials(const char *apiKey, const char *apiSecret, const char *apiDeviceID);
+    void setMQTTCredentials(const char *server, const char *user, const char *password, int port);
 
     bool getBoilerState() const;
     float getTargetTemperature() const;

@@ -6,6 +6,7 @@
 #include <temperature.h>
 #include <program.h>
 #include <input.h>
+#include <MQTT.h>
 
 class MainController : public StateListener, public SettingsListener, public UpdateListener
 {
@@ -39,6 +40,7 @@ private:
     ProgramController &m_program;
     IF_INPUT_ENABLED(InputController &m_input;)
     State &m_state;
+    MQTTController &m_mqtt;
 
     MainController();
 };

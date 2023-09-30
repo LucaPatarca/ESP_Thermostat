@@ -24,6 +24,7 @@ private:
     ping_option m_options;
     ESP8266WebServer m_server;
     String *m_token;
+    bool m_connected;
 
     void notifiStatus(WiFiStatus);
 
@@ -33,7 +34,7 @@ private:
     static void onPingReceive(void *opt, void *resp);
 
     void onRecvWifiCredentials();
-    void onRecvApiCredentials();
+    void onRecvMQTTCredentials();
 
     String* generateToken();
 

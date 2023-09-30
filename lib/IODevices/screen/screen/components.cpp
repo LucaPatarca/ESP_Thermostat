@@ -126,6 +126,8 @@ void WifiIcon::drawImpl()
         break;
     case WiFiStatus::DISCONNECTED:
         m_display.drawBitmap(m_x, m_y, wifiDisconnected, 24, 24, WHITE);
+    case WiFiStatus::CONNECTED_NO_INTERNET:
+        m_display.drawBitmap(m_x, m_y, wifiDisconnected, 24, 24, WHITE);
 
     default:
         break;

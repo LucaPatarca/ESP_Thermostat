@@ -10,7 +10,8 @@ MainController::MainController()
     m_wifi(WifiController::Instance()),
     m_program(ProgramController::Instance()),
     IF_INPUT_ENABLED(m_input(InputController::Instance()),)
-    m_state(State::Instance())
+    m_state(State::Instance()),
+    m_mqtt(MQTTController::Instance())
 {
     m_state.addListener(this);
 }
@@ -23,6 +24,7 @@ void MainController::setup()
 
 void MainController::handle()
 {
+    m_mqtt.handle();
     m_ota.handle();
     m_temperature.handle();
     m_program.handle();
@@ -36,6 +38,7 @@ void MainController::targetTemperatureChanged(Cause cause)
 {
     FINE("notify target temperature changed");
     IF_DISPLAY_ENABLED(m_display.targetTemperatureChanged(cause);)
+    m_mqtt.targetTemperatureChanged(cause);
     m_thermostat.targetTemperatureChanged();
     SEND_REMOTE_LOG();
 }
@@ -45,6 +48,7 @@ void MainController::powerStateChanged(Cause cause)
     FINE("notify power state changed");
     IF_DISPLAY_ENABLED(m_display.powerStateChanged();)
     m_thermostat.powerStateChanged();
+    m_mqtt.powerStateChanged(cause);
     SEND_REMOTE_LOG();
 }
 
@@ -53,6 +57,7 @@ void MainController::thermostatModeChanged(Cause cause)
     FINE("notify thermostat mode changed");
     IF_DISPLAY_ENABLED(m_display.thermostatModeChanged(cause);)
     m_program.thermostatModeChanged();
+    m_mqtt.thermostatModeChanged(cause);
     SEND_REMOTE_LOG();
 }
 
@@ -68,6 +73,7 @@ void MainController::currentTemperatureChanged()
     FINE("notify current temperature changed");
     IF_DISPLAY_ENABLED(m_display.currentTemperatureChanged();)
     m_thermostat.currentTemperatureChanged();
+    m_mqtt.currentTemperatureChanged();
     SEND_REMOTE_LOG();
 }
 
@@ -75,7 +81,10 @@ void MainController::wifiStatusChanged()
 {
     FINE("notify wifi status changed");
     IF_DISPLAY_ENABLED(m_display.wifiStatusChanged();)
-    m_ota.wifiStatusChanged();
+    if(m_state.getWifiStatus() == WiFiStatus::CONNECTED){
+        m_ota.connect();
+        m_mqtt.connect();
+    }
 }
 
 void MainController::onSetSetting(const String& key, String& value)
